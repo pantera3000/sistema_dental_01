@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Evaluación Funcional - {{ paciente.nombre_completo }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 10px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .header {
+            border-bottom: 4px solid #2c3e50;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-subtitle {
+            font-size: 11px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .patient-info {
+            border: 2px solid #34495e;
+            padding: 15px;
+            margin-bottom: 25px;
+            background-color: #ffffff;
+        }
+
+        .patient-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .patient-info td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .patient-info tr:last-child td {
+            border-bottom: none;
+        }
+
+        .patient-info .label {
+            font-weight: 600;
+            color: #7f8c8d;
+            font-size: 9px;
+            text-transform: uppercase;
+            width: 25%;
+        }
+
+        .patient-info .value {
+            font-weight: 600;
+            font-size: 11px;
+            color: #2c3e50;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background-color: #ecf0f1;
+            border-left: 4px solid #3498db;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-row {
+            padding: 8px 12px;
+            border-bottom: 1px solid #ecf0f1;
+            display: table;
+            width: 100%;
+        }
+
+        .field-row:last-child {
+            border-bottom: none;
+        }
+
+        .field-label {
+            font-weight: 500;
+            color: #555;
+            display: table-cell;
+            width: 65%;
+        }
+
+        .field-value {
+            display: table-cell;
+            text-align: right;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .checkbox-yes {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .checkbox-no {
+            color: #bdc3c7;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border: 1px solid #34495e;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
+            color: #2c3e50;
+            background-color: #fff;
+        }
+
+        .signature-section {
+            margin-top: 50px;
+            page-break-inside: avoid;
+        }
+
+        .signature-box {
+            width: 300px;
+            border-top: 2px solid #2c3e50;
+            text-align: center;
+            padding-top: 10px;
+            margin-top: 70px;
+            float: right;
+            font-size: 10px;
+            color: #555;
+        }
+
+        .observations {
+            border: 1px solid #bdc3c7;
+            padding: 15px;
+            background-color: #fafafa;
+            min-height: 80px;
+            font-size: 10px;
+            line-height: 1.8;
+        }
+        
+        table.data-grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table.data-grid td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 9px;
+            color: #95a5a6;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 15px;
+        }
+
+        .preferences-row {
+            display: table;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .pref-cell {
+            display: table-cell;
+            text-align: center;
+            padding: 6px;
+            border: 1px solid #ecf0f1;
+            font-size: 9px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="header-title">Protocolo Niños</h1>
+        <div class="header-subtitle">Evaluación Funcional y Respiratoria | Fecha: {% now "d \d\e F \d\e Y" %}</div>
+    </div>
+
+    <div class="patient-info">
+        <table>
+            <tr>
+                <td class="label">Paciente:</td>
+                <td class="value">{{ paciente.nombre_completo }}</td>
+                <td class="label">Edad:</td>
+                <td class="value">{{ paciente.edad }} años</td>
+            </tr>
+            <tr>
+                <td class="label">DNI:</td>
+                <td class="value">{{ paciente.dni|default:"-" }}</td>
+                <td class="label">Fecha Nac.:</td>
+                <td class="value">{{ paciente.fecha_nacimiento|date:"d/m/Y" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Ventana Nasal</div>
+        <div class="field-row">
+            <span class="field-label">Ventana nasal más cerrada</span>
+            <span class="field-value"><span class="badge">{{ evaluacion.get_ventana_nasal_mas_cerrada_display|default:"-" }}</span></span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Respira mejor por</span>
+            <span class="field-value"><span class="badge">{{ evaluacion.get_ventana_nasal_respira_mejor_display|default:"-" }}</span></span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Sellado Labial y Características Faciales</div>
+        <div class="field-row">
+            <span class="field-label">Sellado labial en reposo</span>
+            <span class="field-value {% if evaluacion.sellado_labial_reposo %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.sellado_labial_reposo %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Fascies adenoidea (ojeras)</span>
+            <span class="field-value {% if evaluacion.fascies_adenoidea %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.fascies_adenoidea %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Labios cortados</span>
+            <span class="field-value {% if evaluacion.labios_cortados %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.labios_cortados %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Patrón de Crecimiento y Oclusión</div>
+        <div class="field-row">
+            <span class="field-label">Patrón de crecimiento</span>
+            <span class="field-value"><span class="badge">{{ evaluacion.get_patron_crecimiento_display|default:"-" }}</span></span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Maloclusión</span>
+            <span class="field-value"><span class="badge">{{ evaluacion.get_maloclusion_display|default:"-" }}</span></span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Mordida cruzada</span>
+            <span class="field-value">{{ evaluacion.get_mordida_cruzada_display|default:"-" }}</span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Mordida abierta</span>
+            <span class="field-value {% if evaluacion.mordida_abierta %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.mordida_abierta %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Sobremordida</span>
+            <span class="field-value">{{ evaluacion.get_sobremordida_display|default:"-" }}</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Amígdalas</div>
+        <div class="field-row">
+            <span class="field-label">Grado</span>
+            <span class="field-value"><span class="badge">{{ evaluacion.get_amigdalas_grado_display|default:"-" }}</span></span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Más inflamada</span>
+            <span class="field-value">{{ evaluacion.get_amigdalas_mas_inflamada_display|default:"-" }}</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Capacidad Masticatoria</div>
+        <table class="data-grid">
+            <tr>
+                <td>
+                    <strong>Masticador derecho:</strong>
+                    <span class="{% if evaluacion.masticador_derecho %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                        {% if evaluacion.masticador_derecho %}✓ SÍ{% else %}✗ NO{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <strong>Masticador izquierdo:</strong>
+                    <span class="{% if evaluacion.masticador_izquierdo %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                        {% if evaluacion.masticador_izquierdo %}✓ SÍ{% else %}✗ NO{% endif %}
+                    </span>
+                </td>
+            </tr>
+        </table>
+        
+        <div style="margin-top: 10px; padding: 8px 12px; font-weight: 600; background-color: #f8f9fa;">Preferencias alimenticias:</div>
+        <div class="preferences-row">
+            <div class="pref-cell">
+                <div>Yogurt</div>
+                <span class="{% if evaluacion.prefiere_yogurt %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if evaluacion.prefiere_yogurt %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="pref-cell">
+                <div>Manzana</div>
+                <span class="{% if evaluacion.prefiere_manzana %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if evaluacion.prefiere_manzana %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="pref-cell">
+                <div>Naranja</div>
+                <span class="{% if evaluacion.prefiere_naranja %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if evaluacion.prefiere_naranja %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="pref-cell">
+                <div>Zumo</div>
+                <span class="{% if evaluacion.prefiere_zumo %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if evaluacion.prefiere_zumo %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <div class="field-row">
+            <span class="field-label">Corta a bocados</span>
+            <span class="field-value {% if evaluacion.corta_bocados %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.corta_bocados %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Tiempo para comer</span>
+            <span class="field-value"><span class="badge">{{ evaluacion.get_tiempo_comer_display|default:"-" }}</span></span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Respiración y Sellado Labial</div>
+        <div class="field-row">
+            <span class="field-label">Aguanta 5 min con labios sellados</span>
+            <span class="field-value {% if evaluacion.aguanta_5min_labios_sellados %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.aguanta_5min_labios_sellados %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Durante el día mantiene sellado labial</span>
+            <span class="field-value {% if evaluacion.dia_mantiene_sellado %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.dia_mantiene_sellado %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Durmiendo mantiene sellado labial</span>
+            <span class="field-value {% if evaluacion.durmiendo_mantiene_sellado %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.durmiendo_mantiene_sellado %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Es respirador oral</span>
+            <span class="field-value {% if evaluacion.es_respirador_oral %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.es_respirador_oral %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Deglución</div>
+        <div class="field-row">
+            <span class="field-label">Traga con normalidad</span>
+            <span class="field-value {% if evaluacion.deglucion_traga_normalidad %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.deglucion_traga_normalidad %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Traga con dificultad</span>
+            <span class="field-value {% if evaluacion.deglucion_traga_dificultad %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.deglucion_traga_dificultad %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Mete la lengua entre los dientes</span>
+            <span class="field-value {% if evaluacion.deglucion_lengua_dientes %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.deglucion_lengua_dientes %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Lengua con marcas en los bordes</span>
+            <span class="field-value {% if evaluacion.deglucion_lengua_marcas %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                {% if evaluacion.deglucion_lengua_marcas %}✓ SÍ{% else %}✗ NO{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Observaciones</div>
+        <div class="observations">
+            {{ evaluacion.observaciones|linebreaksbr|default:"Sin observaciones adicionales." }}
+        </div>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            Firma y Sello del Profesional
+        </div>
+    </div>
+
+    <div class="footer-note">
+        Consultorio Dental | Documento generado el {% now "d/m/Y" %}
+    </div>
+</body>
+</html>

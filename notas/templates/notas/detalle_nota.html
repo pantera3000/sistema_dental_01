@@ -1,0 +1,102 @@
+<!-- notas/templates/notas/detalle_nota.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nota - {{ nota.titulo }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h2 class="mb-2">📝 {{ nota.titulo }}</h2>
+                <p class="text-muted mb-0">
+                    Creada el {{ nota.creado_en|date:"d \d\e F \d\e Y \a \l\a\s H:i" }}
+                    {% if nota.actualizado_en > nota.creado_en %}
+                        • Actualizada el {{ nota.actualizado_en|date:"d/m/Y H:i" }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'notas:editar' nota.pk %}" class="btn btn-warning btn-sm">✏️ Editar</a>
+                
+                <!-- Botón contextual de regreso -->
+                {% if nota.paciente %}
+                    <!-- Si la nota es de un paciente -->
+                    {% if request.META.HTTP_REFERER and 'notas' in request.META.HTTP_REFERER and 'pacientes' not in request.META.HTTP_REFERER %}
+                        <a href="{% url 'notas:lista' %}" class="btn btn-secondary btn-sm">← Lista de Notas</a>
+                    {% else %}
+                        <a href="{% url 'pacientes:detalle' nota.paciente.pk %}?notas_page=1" class="btn btn-secondary btn-sm">← Paciente</a>
+                    {% endif %}
+                {% else %}
+                    <!-- Si es nota general -->
+                    <a href="{% url 'notas:lista' %}" class="btn btn-secondary btn-sm">← Lista de Notas</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if nota.paciente %}
+        <div class="alert alert-info mb-4">
+            <strong>Nota para:</strong> {{ nota.paciente.nombre_completo }} (DNI: {{ nota.paciente.dni }})
+        </div>
+        {% endif %}
+
+        <div class="bg-white p-4 rounded shadow-sm border">
+            <div class="mb-3">
+                <h5 class="mb-2">Contenido</h5>
+                <p class="mb-0">{{ nota.contenido|linebreaks }}</p>
+            </div>
+        </div>
+
+
+        <!-- Imágenes adjuntas -->
+        {% if nota.imagenes.exists %}
+        <div class="mt-4">
+            <h5 class="mb-3">🖼️ Imágenes Adjuntas</h5>
+            <div class="row g-3">
+                {% for img in nota.imagenes.all %}
+                <div class="col-md-4 col-sm-6">
+                    <div class="card h-100 border">
+                        {% if img.imagen %}
+                            <!-- Imagen Local -->
+                            <a href="{{ img.imagen.url }}" target="_blank" class="d-block" style="height: 180px;">
+                                <img src="{{ img.imagen.url }}" 
+                                    class="card-img-top object-fit-cover w-100 h-100" 
+                                    alt="Imagen de nota">
+                            </a>
+                            <div class="card-body p-2">
+                                <p class="card-text small mb-1 text-center">
+                                    {{ img.descripcion|default:"Sin descripción" }}
+                                </p>
+                                <p class="text-center mb-0">
+                                    <span class="badge bg-primary">📤 Local</span>
+                                </p>
+                            </div>
+                        {% elif img.imagen_drive_url %}
+                            <!-- Imagen de Google Drive -->
+                            <a href="{{ img.imagen_drive_url }}" target="_blank" class="d-block" style="height: 180px;">
+                                <img src="{{ img.get_drive_embed_url }}" 
+                                    class="card-img-top object-fit-cover w-100 h-100" 
+                                    alt="Imagen de Google Drive">
+                            </a>
+                            <div class="card-body p-2">
+                                <p class="card-text small mb-1 text-center">
+                                    {{ img.descripcion|default:"Sin descripción" }}
+                                </p>
+                                <p class="text-center mb-0">
+                                    <span class="badge bg-success">📁 Google Drive</span>
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+
+
+    </div>
+</div>
+{% endblock %}

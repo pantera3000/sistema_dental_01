@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Consultorio Dental{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    }
+    
+    .kpi-card.green {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        box-shadow: 0 10px 30px rgba(17, 153, 142, 0.3);
+    }
+    
+    .kpi-card.orange {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+    }
+    
+    .kpi-card.blue {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+    }
+    
+    .kpi-card.red {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        box-shadow: 0 10px 30px rgba(250, 112, 154, 0.3);
+    }
+    
+    .kpi-card.teal {
+        background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        box-shadow: 0 10px 30px rgba(48, 207, 208, 0.3);
+    }
+    
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+    
+    .kpi-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .kpi-icon {
+        font-size: 2.5rem;
+        opacity: 0.3;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        height: 350px;
+    }
+    
+    .list-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+    }
+    
+    .list-card h5 {
+        color: #667eea;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .list-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s;
+    }
+    
+    .list-item:last-child {
+        border-bottom: none;
+    }
+    
+    .list-item:hover {
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .badge-custom {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">📊 Dashboard</h2>
+        <small class="text-muted">Última actualización: {{ now|date:"d/m/Y H:i" }}</small>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg-2">
+            <div class="kpi-card">
+                <i class="bi bi-people kpi-icon"></i>
+                <div class="kpi-label">Pacientes Activos</div>
+                <div class="kpi-value">{{ pacientes_activos }}</div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="kpi-card green">
+                <i class="bi bi-cash-stack kpi-icon"></i>
+                <div class="kpi-label">Ingresos del Mes</div>
+                <div class="kpi-value">S/ {{ ingresos_mes|floatformat:0 }}</div>
+            </div>
+        </div>
+        <!-- <div class="col-md-4 col-lg-2">
+            <div class="kpi-card orange">
+                <i class="bi bi-clipboard-pulse kpi-icon"></i>
+                <div class="kpi-label">Tratamientos Activos</div>
+                <div class="kpi-value">{{ tratamientos_activos }}</div>
+            </div>
+        </div> -->
+        <div class="col-md-4 col-lg-2">
+            <div class="kpi-card blue">
+                <i class="bi bi-calendar-check kpi-icon"></i>
+                <div class="kpi-label">Citas Semana</div>
+                <div class="kpi-value">{{ citas_semana }}</div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="kpi-card red">
+                <i class="bi bi-exclamation-triangle kpi-icon"></i>
+                <div class="kpi-label">Deuda Total</div>
+                <div class="kpi-value">S/ {{ deuda_total|floatformat:0 }}</div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="kpi-card teal">
+                <i class="bi bi-graph-up kpi-icon"></i>
+                <div class="kpi-label">Tasa de Cobro</div>
+                <div class="kpi-value">{{ tasa_cobro }}%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5 class="mb-3">📈 Ingresos Mensuales</h5>
+                <canvas id="ingresosChart"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5 class="mb-3">🍩 Tratamientos por Estado</h5>
+                <canvas id="tratamientosChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5 class="mb-3">👥 Pacientes Nuevos (Últimos 6 Meses)</h5>
+                <canvas id="pacientesChart"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5 class="mb-3">💳 Métodos de Pago</h5>
+                <canvas id="metodosChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Lists -->
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="list-card">
+                <h5><i class="bi bi-calendar-event"></i> Próximas Citas</h5>
+                {% if proximas_citas %}
+                    {% for cita in proximas_citas %}
+                    <div class="list-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ cita.name }}</strong>
+                                {% if cita.description %}
+                                <div class="small text-muted">{{ cita.description|truncatewords:5 }}</div>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-primary">{{ cita.local_begin|date:"d/m H:i" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">No hay citas próximas</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="list-card">
+                <h5><i class="bi bi-exclamation-circle"></i> Mayor Deuda</h5>
+                {% if pacientes_deuda %}
+                    {% for item in pacientes_deuda %}
+                    <div class="list-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ item.paciente.nombre_completo }}</strong>
+                                <div class="small text-muted">{{ item.tratamiento.descripcion|truncatewords:3 }}</div>
+                            </div>
+                            <span class="badge bg-danger">S/ {{ item.deuda|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">No hay deudas pendientes</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="list-card">
+                <h5><i class="bi bi-cake2"></i> Cumpleaños Próximos</h5>
+                {% if cumpleanos_proximos %}
+                    {% for paciente in cumpleanos_proximos %}
+                    <div class="list-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ paciente.nombre_completo }}</strong>
+                                <div class="small text-muted">{{ paciente.telefono }}</div>
+                            </div>
+                            <span class="badge bg-info">{{ paciente.fecha_nacimiento|date:"d/m" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">No hay cumpleaños próximos</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Configuración global de Chart.js
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#666';
+
+// Gráfico de Ingresos Mensuales
+const ingresosCtx = document.getElementById('ingresosChart').getContext('2d');
+new Chart(ingresosCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ meses_labels|safe }},
+        datasets: [{
+            label: 'Ingresos (S/)',
+            data: {{ ingresos_mensuales|safe }},
+            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+            borderColor: 'rgba(102, 126, 234, 1)',
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'S/ ' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Tratamientos por Estado
+const tratamientosCtx = document.getElementById('tratamientosChart').getContext('2d');
+new Chart(tratamientosCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['En Progreso', 'Completados', 'Pendientes'],
+        datasets: [{
+            data: [
+                {{ tratamientos_stats.en_progreso }},
+                {{ tratamientos_stats.completado }},
+                {{ tratamientos_stats.pendiente }}
+            ],
+            backgroundColor: [
+                'rgba(245, 87, 108, 0.8)',
+                'rgba(56, 239, 125, 0.8)',
+                'rgba(150, 150, 150, 0.8)'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Gráfico de Pacientes Nuevos
+const pacientesCtx = document.getElementById('pacientesChart').getContext('2d');
+new Chart(pacientesCtx, {
+    type: 'line',
+    data: {
+        labels: {{ meses_labels|safe }},
+        datasets: [{
+            label: 'Pacientes Nuevos',
+            data: {{ pacientes_nuevos_mes|safe }},
+            borderColor: 'rgba(79, 172, 254, 1)',
+            backgroundColor: 'rgba(79, 172, 254, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Métodos de Pago
+const metodosCtx = document.getElementById('metodosChart').getContext('2d');
+new Chart(metodosCtx, {
+    type: 'bar',
+    data: {
+        labels: [
+            {% for metodo in metodos_pago %}
+                '{{ metodo.metodo_pago|capfirst }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Total (S/)',
+            data: [
+                {% for metodo in metodos_pago %}
+                    {{ metodo.total }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                'rgba(17, 153, 142, 0.8)',
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(240, 147, 251, 0.8)',
+                'rgba(250, 112, 154, 0.8)'
+            ],
+            borderRadius: 8
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'S/ ' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

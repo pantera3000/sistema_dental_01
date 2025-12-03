@@ -1,0 +1,739 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ paciente.nombre_completo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variables y Utilidades */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+        --card-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        --hover-transform: translateY(-3px);
+    }
+
+    .bg-gradient-primary {
+        background: var(--primary-gradient) !important;
+    }
+
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+        transform: var(--hover-transform);
+        box-shadow: var(--card-shadow);
+    }
+
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        background-color: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        border: 4px solid rgba(255,255,255,0.3);
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: #212529;
+        font-weight: 500;
+        min-height: 1.5rem; /* Asegura altura aunque esté vacío */
+    }
+
+    /* Pestañas personalizadas */
+    .nav-pills .nav-link {
+        color: #495057;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .nav-pills .nav-link.active {
+        background-color: #0d6efd;
+        color: white;
+        box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+    }
+    
+    /* Tablas */
+    .table-custom th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Badge de imágenes */
+    .badge-images {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.35rem 0.65rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        transition: all 0.2s ease;
+    }
+
+    .badge-images:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Badge flotante para notas */
+    .nota-card-wrapper {
+        position: relative;
+    }
+
+    .badge-images-float {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        z-index: 10;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Encabezado de Perfil -->
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="bg-gradient-primary p-4 text-white">
+                <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+                    <div class="avatar-circle shadow-sm">
+                        👤
+                    </div>
+                    <div class="flex-grow-1 text-center text-md-start">
+                        <h2 class="fw-bold mb-1">{{ paciente.nombre_completo }}</h2>
+                        <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 opacity-75">
+                            <span><i class="bi bi-person-vcard"></i> DNI: {{ paciente.dni }}</span>
+                            <span><i class="bi bi-cake"></i> {{ paciente.edad }} años</span>
+                            {% if paciente.dias_hasta_cumple == 0 %}
+                                <span class="badge bg-warning text-dark animate__animated animate__pulse animate__infinite">🎂 ¡Hoy es su cumpleaños!</span>
+                            {% else %}
+                                <span><i class="bi bi-calendar-event"></i> Cumple en {{ paciente.dias_hasta_cumple }} días</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        {% if paciente.telefono %}
+                        <button type="button" class="btn btn-success shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#whatsappModal">
+                            <i class="bi bi-whatsapp"></i> WhatsApp
+                        </button>
+                        {% endif %}
+
+
+
+
+                        <a href="{% url 'pacientes:editar' paciente.pk %}" class="btn btn-light shadow-sm fw-bold">
+                            ✏️ Editar
+                        </a>
+                        <a href="{% url 'pacientes:lista' %}" class="btn btn-outline-light fw-bold">
+                            ← Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Columna Izquierda: Información Detallada -->
+        <div class="col-lg-4">
+            <!-- Datos Personales -->
+            <div class="card border-0 shadow-sm mb-4 card-hover">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="card-title fw-bold mb-0 text-primary">
+                        📊 Datos Personales
+                    </h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="vstack gap-3">
+                        <div>
+                            <div class="info-label">Fecha de Nacimiento</div>
+                            <div class="info-value">{{ paciente.fecha_nacimiento|date:"d \d\e F \d\e Y" }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="info-label">Género</div>
+                                <div class="info-value">{{ paciente.get_genero_display }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-label">Estado Civil</div>
+                                <div class="info-value">{{ paciente.get_estado_civil_display }}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="info-label">Teléfono</div>
+                            <div class="info-value">{{ paciente.telefono|default:"—" }}</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Email</div>
+                            <div class="info-value">{{ paciente.email|default:"—" }}</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Distrito</div>
+                            <div class="info-value">{{ paciente.distrito|default:"—" }}</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Dirección</div>
+                            <div class="info-value">{{ paciente.direccion|default:"—" }}</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Ocupación</div>
+                            <div class="info-value">{{ paciente.ocupacion|default:"—" }}</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Tutor / Apoderado</div>
+                            <div class="info-value">{{ paciente.nombre_tutor|default:"—" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historia Dental -->
+            <div class="card border-0 shadow-sm mb-4 card-hover">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="card-title fw-bold mb-0 text-info">
+                        🦷 Historia Dental
+                    </h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="vstack gap-3">
+                        <div>
+                            <div class="info-label">Tratamientos Previos</div>
+                            <div class="info-value">{{ paciente.tratamientos_previos|default:"—" }}</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Experiencias Dentales</div>
+                            <div class="info-value">{{ paciente.experiencias_dentales|default:"—" }}</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Observaciones</div>
+                            <div class="info-value">{{ paciente.observaciones|default:"—" }}</div>
+                        </div>
+                        <div class="mt-2 pt-2 border-top">
+                            <a href="{% url 'tratamientos:odontograma' paciente.pk %}" class="btn btn-primary w-100 shadow-sm">
+                                🦷 Ver Odontograma
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Historial y Antecedentes -->
+        <div class="col-lg-8">
+            <!-- Resumen Médico (Tarjetas pequeñas) -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-danger bg-opacity-10 h-100">
+                        <div class="card-body">
+                            <h6 class="text-danger fw-bold mb-2">🩸 Grupo Sanguíneo</h6>
+                            <p class="h4 mb-0 text-dark">{{ paciente.get_grupo_sanguineo_display|default:"—" }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm bg-warning bg-opacity-10 h-100">
+                        <div class="card-body">
+                            <h6 class="text-warning-emphasis fw-bold mb-2">⚠️ Alergias & Antecedentes</h6>
+                            <div class="small text-dark">
+                                <div class="mb-2">
+                                    <strong>Alergias:</strong>
+                                    <span class="d-block">{{ paciente.alergias|default:"—" }}</span>
+                                </div>
+                                <div>
+                                    <strong>Enfermedades:</strong>
+                                    <span class="d-block">{{ paciente.enfermedades_previas|default:"—" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestañas de Historial -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <ul class="nav nav-pills card-header-pills" id="patientTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="historias-tab" data-bs-toggle="tab" data-bs-target="#historias" type="button">
+                                📚 Historias
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tratamientos-tab" data-bs-toggle="tab" data-bs-target="#tratamientos" type="button">
+                                💳 Tratamientos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="notas-tab" data-bs-toggle="tab" data-bs-target="#notas" type="button">
+                                📝 Notas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="protocolo-tab" data-bs-toggle="tab" data-bs-target="#protocolo" type="button">
+                                🧸 Protocolo Niños
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="programa-tab" data-bs-toggle="tab" data-bs-target="#programa" type="button">
+                                🌱 Programa Salud
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="tab-content" id="patientTabsContent">
+                        <!-- Historias Clínicas -->
+                        <div class="tab-pane fade show active" id="historias" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0 fw-bold text-secondary">Historial Clínico</h5>
+                                <a href="{% url 'historias:crear_entrada' paciente.pk %}" class="btn btn-primary btn-sm shadow-sm">
+                                    ➕ Nueva Consulta
+                                </a>
+                            </div>
+                            
+                            {% if historias_paginadas %}
+                                <div class="table-responsive rounded-3 border">
+                                    <table class="table table-hover table-custom mb-0 align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Motivo</th>
+                                                <th>Diagnóstico</th>
+                                                <th class="text-center">Imágenes</th>
+                                                <th class="text-end">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entrada in historias_paginadas %}
+                                            <tr>
+                                                <td class="text-nowrap">{{ entrada.fecha|date:"d/m/Y" }} <small class="text-muted d-block">{{ entrada.fecha|date:"H:i" }}</small></td>
+                                                <td class="fw-medium">{{ entrada.motivo }}</td>
+                                                <td class="text-muted">{{ entrada.diagnostico|truncatewords:8 }}</td>
+                                                <td class="text-center">
+                                                    {% if entrada.num_imagenes > 0 %}
+                                                        <span class="badge-images" title="{{ entrada.num_imagenes }} imagen{% if entrada.num_imagenes > 1 %}es{% endif %}">
+                                                            📷 {{ entrada.num_imagenes }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted">—</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="btn-group">
+                                                        <a href="{% url 'historias:detalle_entrada' entrada.pk %}" class="btn btn-sm btn-outline-primary" title="Ver detalle">👁️</a>
+                                                        <a href="{% url 'historias:eliminar_entrada' entrada.pk %}" 
+                                                           class="btn btn-sm btn-outline-danger"
+                                                           onclick="return confirm('¿Eliminar la entrada del {{ entrada.fecha|date:'d/m/Y' }}?')"
+                                                           title="Eliminar">🗑️</a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Paginación Historias -->
+                                {% if historias_paginadas.has_other_pages %}
+                                    {% include "pacientes/components/pagination.html" with page_obj=historias_paginadas param_name="historias_page" %}
+                                {% endif %}
+                            {% else %}
+                                <div class="text-center py-5 text-muted bg-light rounded-3 border border-dashed">
+                                    <div class="fs-1 mb-2">📂</div>
+                                    <p class="mb-0">No hay historias clínicas registradas.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tratamientos -->
+                        <div class="tab-pane fade" id="tratamientos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0 fw-bold text-secondary">Plan de Tratamientos</h5>
+                                <a href="{% url 'tratamientos:crear_tratamiento' paciente.pk %}" class="btn btn-success btn-sm shadow-sm text-white">
+                                    ➕ Nuevo Tratamiento
+                                </a>
+                            </div>
+
+                            {% if tratamientos_paginados %}
+                                <div class="table-responsive rounded-3 border">
+                                    <table class="table table-hover table-custom mb-0 align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Tratamiento</th>
+                                                <th>Económico</th>
+                                                <th>Estado</th>
+                                                <th class="text-end">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for t in tratamientos_paginados %}
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-bold d-block">{{ t.nombre }}</span>
+                                                    <small class="text-muted">{{ t.get_estado_display }}</small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column small">
+                                                        <span class="text-success">Total: S/ {{ t.costo_total }}</span>
+                                                        <span class="text-muted">Pagado: S/ {{ t.total_pagado }}</span>
+                                                        {% if t.deuda > 0 %}
+                                                            <span class="text-danger fw-bold">Deuda: S/ {{ t.deuda }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge rounded-pill bg-{{ t.clase_estado_pago }}">
+                                                        {% if t.estado_pago == 'completado' %}Pagado
+                                                        {% elif t.estado_pago == 'parcial' %}Parcial
+                                                        {% else %}Pendiente{% endif %}
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="{% url 'tratamientos:detalle' t.pk %}" class="btn btn-sm btn-outline-info" title="Ver detalle">👁️ Ver</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Paginación Tratamientos -->
+                                {% if tratamientos_paginados.has_other_pages %}
+                                    {% include "pacientes/components/pagination.html" with page_obj=tratamientos_paginados param_name="tratamientos_page" %}
+                                {% endif %}
+                            {% else %}
+                                <div class="text-center py-5 text-muted bg-light rounded-3 border border-dashed">
+                                    <div class="fs-1 mb-2">💰</div>
+                                    <p class="mb-0">No hay tratamientos registrados.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Notas -->
+                        <div class="tab-pane fade" id="notas" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0 fw-bold text-secondary">Notas Adicionales</h5>
+                                <a href="{% url 'notas:crear_para_paciente' paciente.pk %}" class="btn btn-secondary btn-sm shadow-sm">
+                                    ➕ Nueva Nota
+                                </a>
+                            </div>
+
+                            {% if notas_paginadas %}
+                                <div class="row g-3">
+                                    {% for nota in notas_paginadas %}
+                                    <div class="col-md-6">
+                                        <div class="nota-card-wrapper">
+                                            {% if nota.num_imagenes > 0 %}
+                                                <span class="badge-images badge-images-float" title="{{ nota.num_imagenes }} imagen{% if nota.num_imagenes > 1 %}es{% endif %}">
+                                                    📷 {{ nota.num_imagenes }}
+                                                </span>
+                                            {% endif %}
+                                            <div class="card h-100 border shadow-sm hover-shadow transition-all">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title fw-bold text-dark mb-0">{{ nota.titulo }}</h6>
+                                                        <small class="text-muted">{{ nota.creado_en|date:"d/m/Y" }}</small>
+                                                    </div>
+                                                    <p class="card-text text-secondary small mb-3">{{ nota.contenido|truncatewords:15 }}</p>
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <a href="{% url 'notas:detalle' nota.pk %}" class="btn btn-link btn-sm p-0 text-decoration-none">Ver más</a>
+                                                        <a href="{% url 'notas:eliminar' nota.pk %}" 
+                                                           class="btn btn-link btn-sm p-0 text-danger text-decoration-none"
+                                                           onclick="return confirm('¿Eliminar nota?')">Eliminar</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <!-- Paginación Notas -->
+                                {% if notas_paginadas.has_other_pages %}
+                                    {% include "pacientes/components/pagination.html" with page_obj=notas_paginadas param_name="notas_page" %}
+                                {% endif %}
+                            {% else %}
+                                <div class="text-center py-5 text-muted bg-light rounded-3 border border-dashed">
+                                    <div class="fs-1 mb-2">📝</div>
+                                    <p class="mb-0">No hay notas registradas.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Protocolo Niños -->
+                        <div class="tab-pane fade" id="protocolo" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0 fw-bold text-secondary">Evaluación Funcional y Respiratoria</h5>
+                                <div class="d-flex gap-2">
+                                    {% if evaluacion_funcional %}
+                                    <a href="{% url 'protocolo_ninos:exportar_pdf' paciente.pk %}" class="btn btn-outline-danger btn-sm shadow-sm" target="_blank">
+                                        📄 Exportar PDF
+                                    </a>
+                                    {% endif %}
+                                    <a href="{% url 'protocolo_ninos:crear_editar_evaluacion' paciente.pk %}" class="btn btn-info btn-sm shadow-sm text-white">
+                                        {% if evaluacion_funcional %}✏️ Editar Evaluación{% else %}➕ Iniciar Evaluación{% endif %}
+                                    </a>
+                                </div>
+                            </div>
+
+                            {% if evaluacion_funcional %}
+                                <div class="card border-0 shadow-sm bg-light">
+                                    <div class="card-body">
+                                        <div class="row g-4">
+                                            <!-- Resumen Rápido -->
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-primary mb-3">Resumen de Evaluación</h6>
+                                                <ul class="list-group list-group-flush bg-transparent">
+                                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+                                                        <span>Patrón de Crecimiento</span>
+                                                        <span class="badge bg-primary rounded-pill">{{ evaluacion_funcional.get_patron_crecimiento_display|default:"-" }}</span>
+                                                    </li>
+                                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+                                                        <span>Maloclusión</span>
+                                                        <span class="badge bg-info rounded-pill">{{ evaluacion_funcional.get_maloclusion_display|default:"-" }}</span>
+                                                    </li>
+                                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+                                                        <span>Respiración Nocturna</span>
+                                                        <span class="text-end small">{{ evaluacion_funcional.get_respiracion_nocturna_display|default:"-" }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-success mb-3">Plan de Tratamiento Activo</h6>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    {% if evaluacion_funcional.plan_refuerzo_habitos %}<span class="badge bg-success">Refuerzo Hábitos</span>{% endif %}
+                                                    {% if evaluacion_funcional.plan_placa_confort %}<span class="badge bg-success">PlacaConfort</span>{% endif %}
+                                                    {% if evaluacion_funcional.plan_deglu_confort %}<span class="badge bg-success">DegluConfort</span>{% endif %}
+                                                    {% if evaluacion_funcional.plan_nariz_confort %}<span class="badge bg-success">NarizConfort</span>{% endif %}
+                                                    {% if evaluacion_funcional.plan_mascalin %}<span class="badge bg-success">Mascalín</span>{% endif %}
+                                                </div>
+                                                <div class="mt-3">
+                                                    <small class="text-muted">Última actualización: {{ evaluacion_funcional.fecha_actualizacion|date:"d/m/Y H:i" }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-center">
+                                            <a href="{% url 'protocolo_ninos:crear_editar_evaluacion' paciente.pk %}" class="btn btn-outline-primary btn-sm">
+                                                Ver Evaluación Completa
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-muted bg-light rounded-3 border border-dashed">
+                                    <div class="fs-1 mb-2">🧸</div>
+                                    <p class="mb-0">No hay evaluación funcional registrada.</p>
+                                    <a href="{% url 'protocolo_ninos:crear_editar_evaluacion' paciente.pk %}" class="btn btn-primary btn-sm mt-3">
+                                        Iniciar Evaluación
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Programa Salud -->
+                        <div class="tab-pane fade" id="programa" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0 fw-bold text-secondary">Programa Salud-Confort</h5>
+                                <div class="d-flex gap-2">
+                                    {% if programa_salud %}
+                                    <a href="{% url 'programa_salud:exportar_pdf' paciente.pk %}" class="btn btn-outline-danger btn-sm shadow-sm" target="_blank">
+                                        📄 Exportar PDF
+                                    </a>
+                                    {% endif %}
+                                    <a href="{% url 'programa_salud:crear_editar_programa' paciente.pk %}" class="btn btn-success btn-sm shadow-sm text-white">
+                                        {% if programa_salud %}✏️ Editar Programa{% else %}➕ Iniciar Programa{% endif %}
+                                    </a>
+                                </div>
+                            </div>
+
+                            {% if programa_salud %}
+                                <div class="card border-0 shadow-sm bg-light">
+                                    <div class="card-body">
+                                        <div class="row g-4">
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-success mb-3">Resumen de Hábitos</h6>
+                                                <ul class="list-group list-group-flush bg-transparent">
+                                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+                                                        <span>Fumador</span>
+                                                        <span class="badge {% if programa_salud.es_fumador %}bg-danger{% else %}bg-success{% endif %} rounded-pill">
+                                                            {% if programa_salud.es_fumador %}SI{% else %}NO{% endif %}
+                                                        </span>
+                                                    </li>
+                                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+                                                        <span>Bebedor</span>
+                                                        <span class="badge {% if programa_salud.es_bebedor %}bg-warning{% else %}bg-success{% endif %} rounded-pill">
+                                                            {% if programa_salud.es_bebedor %}SI{% else %}NO{% endif %}
+                                                        </span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-primary mb-3">Actividades Asignadas</h6>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    {% if programa_salud.enjuagues_manana or programa_salud.enjuagues_tarde %}<span class="badge bg-info">Enjuagues</span>{% endif %}
+                                                    {% if programa_salud.placa_uso_relajacion or programa_salud.placa_uso_noche %}<span class="badge bg-info">PlacaConfort</span>{% endif %}
+                                                    {% if programa_salud.nariz_uso_derecho or programa_salud.nariz_uso_izquierdo or programa_salud.nariz_uso_bilateral %}<span class="badge bg-info">NarizConfort</span>{% endif %}
+                                                    {% if programa_salud.ejercicio_caminata %}<span class="badge bg-info">Caminata</span>{% endif %}
+                                                </div>
+                                                <div class="mt-3">
+                                                    <small class="text-muted">Última actualización: {{ programa_salud.fecha_actualizacion|date:"d/m/Y H:i" }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-center">
+                                            <a href="{% url 'programa_salud:crear_editar_programa' paciente.pk %}" class="btn btn-outline-success btn-sm">
+                                                Ver Programa Completo
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-muted bg-light rounded-3 border border-dashed">
+                                    <div class="fs-1 mb-2">🌱</div>
+                                    <p class="mb-0">No hay programa de salud registrado.</p>
+                                    <a href="{% url 'programa_salud:crear_editar_programa' paciente.pk %}" class="btn btn-success btn-sm mt-3">
+                                        Iniciar Programa
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejo de pestañas activas basado en URL
+    const urlParams = new URLSearchParams(window.location.search);
+    let activeTab = 'historias-tab';
+
+    if (urlParams.has('tratamientos_page')) activeTab = 'tratamientos-tab';
+    else if (urlParams.has('notas_page')) activeTab = 'notas-tab';
+    else if (urlParams.has('historias_page')) activeTab = 'historias-tab';
+
+    const tabButton = document.getElementById(activeTab);
+    if (tabButton) {
+        const tab = new bootstrap.Tab(tabButton);
+        tab.show();
+    }
+});
+</script>
+{% endblock %}
+
+
+
+
+<!-- Modal de WhatsApp -->
+<div class="modal fade" id="whatsappModal" tabindex="-1" aria-labelledby="whatsappModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="whatsappModalLabel">
+                    <i class="bi bi-whatsapp" id="whatsappModalIcon"></i> Enviar WhatsApp
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Selector de Plantilla -->
+                <div class="mb-3">
+                    <label for="whatsappTemplateSelect" class="form-label fw-bold">
+                        <i class="bi bi-file-text"></i> Seleccionar Plantilla
+                    </label>
+                    <select class="form-select" id="whatsappTemplateSelect">
+                        <!-- Las opciones se cargan dinámicamente con JavaScript -->
+                    </select>
+                </div>
+
+                <!-- Editor de Mensaje -->
+                <div class="mb-3">
+                    <label for="whatsappMessage" class="form-label fw-bold">
+                        <i class="bi bi-chat-text"></i> Mensaje
+                    </label>
+                    <textarea class="form-control" id="whatsappMessage" rows="6" placeholder="Escribe tu mensaje aquí..."></textarea>
+                    <div class="form-text">
+                        <small id="charCount" class="text-muted">0 caracteres</small>
+                    </div>
+                </div>
+
+                <!-- Información del Paciente -->
+                <div class="alert alert-info mb-0">
+                    <small>
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Paciente:</strong> {{ paciente.nombre_completo }}<br>
+                        <strong>Teléfono:</strong> {{ paciente.telefono|default:"No registrado" }}
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="sendWhatsAppBtn">
+                    <i class="bi bi-whatsapp"></i> Enviar por WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- WhatsApp Modal Script -->
+<script src="{% static 'js/whatsapp_modal.js' %}"></script>
+<script>
+// Inicializar modal de WhatsApp con datos del paciente
+document.addEventListener('DOMContentLoaded', function() {
+    // Preparar datos del paciente
+    const pacienteData = {
+        nombre: '{{ paciente.nombre_completo }}',
+        telefono: '{{ paciente.telefono }}',
+        consultorio: '{{ config_consultorio.nombre_consultorio|default:"Consultorio Dental" }}',
+        // Datos opcionales que se pueden usar en plantillas
+        fecha: '',  // Se puede llenar dinámicamente si hay cita próxima
+        hora: '',
+        monto: '',  // Se puede llenar si hay deuda
+        tratamiento: ''
+    };
+    
+    // Inicializar el modal
+    initWhatsAppModal(pacienteData);
+});
+</script>
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,470 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if programa %}Editar{% else %}Iniciar{% endif %} Programa Salud - {{ paciente.nombre_completo }}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section-title {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+
+    .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        transition: all .3s ease;
+    }
+
+    .instruction-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #198754;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-success mb-0">
+                🌱 Programa Salud-Confort
+            </h2>
+            <p class="text-muted mb-0">Paciente: {{ paciente.nombre_completo }}</p>
+        </div>
+        <a href="{% url 'pacientes:detalle' paciente.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Paciente
+        </a>
+    </div>
+
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <!-- 1. Datos del Paciente y Hábitos -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="form-section-title">
+                    <i class="bi bi-person-lines-fill fs-4"></i>
+                    <h5 class="mb-0">Datos del Paciente y Hábitos</h5>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Paciente</label>
+                        <input type="text" class="form-control" value="{{ paciente.nombre_completo }}" disabled>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Edad</label>
+                        <input type="text" class="form-control" value="{{ paciente.edad }} años" disabled>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Hábitos</label>
+                        <div class="d-flex gap-4">
+                            <div class="form-check">
+                                {{ form.es_fumador }}
+                                <label class="form-check-label" for="{{ form.es_fumador.id_for_label }}">Fumador</label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.es_bebedor }}
+                                <label class="form-check-label" for="{{ form.es_bebedor.id_for_label }}">Bebedor</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Evaluación de Funciones -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="form-section-title">
+                    <i class="bi bi-activity fs-4"></i>
+                    <h5 class="mb-0">Evaluación de Funciones</h5>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-success mb-3">Masticación</h6>
+                        {% for radio in form.masticacion_lado %}
+                        <div class="form-check mb-2">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                {{ radio.choice_label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-success mb-3">Ventana Nasal Predominante</h6>
+                        {% for radio in form.ventana_nasal_predominante %}
+                        <div class="form-check mb-2">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                {{ radio.choice_label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="col-12">
+                        <hr class="my-4">
+                        <h6 class="fw-bold text-success mb-3">Síndrome Simpático Silencioso (SSS)</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_respiracion_oral }}
+                                    <label class="form-check-label" for="{{ form.sss_respiracion_oral.id_for_label }}">Respiración oral / Boca seca</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_calidad_sueno }}
+                                    <label class="form-check-label" for="{{ form.sss_calidad_sueno.id_for_label }}">Calidad sueño / Ronquido</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_gingivitis }}
+                                    <label class="form-check-label" for="{{ form.sss_gingivitis.id_for_label }}">Gingivitis / Periodontal</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_faringitis }}
+                                    <label class="form-check-label" for="{{ form.sss_faringitis.id_for_label }}">Faringitis crónica</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_atm }}
+                                    <label class="form-check-label" for="{{ form.sss_atm.id_for_label }}">Desorden ATM / Bruxismo</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_reflujo }}
+                                    <label class="form-check-label" for="{{ form.sss_reflujo.id_for_label }}">Reflujo / Digestivos</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_cefaleas }}
+                                    <label class="form-check-label" for="{{ form.sss_cefaleas.id_for_label }}">Cefaleas / Migrañas</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_cervical }}
+                                    <label class="form-check-label" for="{{ form.sss_cervical.id_for_label }}">Dolor cervical / Varios</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_patologia_homolateral }}
+                                    <label class="form-check-label" for="{{ form.sss_patologia_homolateral.id_for_label }}">Patología homolateral</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_masticacion_unilateral }}
+                                    <label class="form-check-label" for="{{ form.sss_masticacion_unilateral.id_for_label }}">Masticación unilateral</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_astenia }}
+                                    <label class="form-check-label" for="{{ form.sss_astenia.id_for_label }}">Astenia / Agotamiento</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_ansiedad }}
+                                    <label class="form-check-label" for="{{ form.sss_ansiedad.id_for_label }}">Ansiedad / Depresión</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_alergias }}
+                                    <label class="form-check-label" for="{{ form.sss_alergias.id_for_label }}">Alergias / Rinitis / Asma</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    {{ form.sss_hipertension }}
+                                    <label class="form-check-label" for="{{ form.sss_hipertension.id_for_label }}">Hipertensión / Riesgo CV</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Antecedentes -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="form-section-title">
+                    <i class="bi bi-clock-history fs-4"></i>
+                    <h5 class="mb-0">Antecedentes</h5>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Otras patologías</label>
+                        {{ form.otras_patologias }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Medicación</label>
+                        {{ form.medicacion }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Intervenciones previas</label>
+                        {{ form.intervenciones_previas }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Ejercicio físico</label>
+                        {{ form.ejercicio_fisico_antecedentes }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Actividades Diarias del Programa -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="form-section-title">
+                    <i class="bi bi-calendar-check fs-4"></i>
+                    <h5 class="mb-0">Actividades Diarias del Programa</h5>
+                </div>
+
+                <div class="row g-4">
+                    <!-- 1. Enjuagues -->
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">1. Enjuagues con aceite de oliva</h6>
+                                <p class="small text-muted mb-2">1 cucharada. Mantener 15 min en boca y tragar lentamente.</p>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        {{ form.enjuagues_manana }}
+                                        <label class="form-check-label" for="{{ form.enjuagues_manana.id_for_label }}">Mañana</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.enjuagues_tarde }}
+                                        <label class="form-check-label" for="{{ form.enjuagues_tarde.id_for_label }}">Tarde</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. AcuaConfort -->
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">2. AcuaConfort</h6>
+                                <p class="small text-muted mb-2">3/4 agua manantial + 1/4 agua mar + 1 limón.</p>
+                                <div class="instruction-box py-2 mb-0">
+                                    <small>Consumo: 1 litro al día, a tragos pequeños, paladeando 20s.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. PlacaConfort -->
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">3. PlacaConfort / DegluConfort</h6>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Talla:</label>
+                                    {{ form.placa_talla }}
+                                </div>
+                                <div class="form-check">
+                                    {{ form.placa_uso_relajacion }}
+                                    <label class="form-check-label" for="{{ form.placa_uso_relajacion.id_for_label }}">Usar 3 ratos al día (relajación)</label>
+                                </div>
+                                <div class="form-check">
+                                    {{ form.placa_uso_noche }}
+                                    <label class="form-check-label" for="{{ form.placa_uso_noche.id_for_label }}">Usar todas las noches (dormir)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. NarizConfort -->
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">4. NarizConfort</h6>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Talla:</label>
+                                    {{ form.nariz_talla }}
+                                </div>
+                                <div class="d-flex gap-3 flex-wrap">
+                                    <div class="form-check">
+                                        {{ form.nariz_uso_derecho }}
+                                        <label class="form-check-label" for="{{ form.nariz_uso_derecho.id_for_label }}">Derecho</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.nariz_uso_izquierdo }}
+                                        <label class="form-check-label" for="{{ form.nariz_uso_izquierdo.id_for_label }}">Izquierdo</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.nariz_uso_bilateral }}
+                                        <label class="form-check-label" for="{{ form.nariz_uso_bilateral.id_for_label }}">Bilateral</label>
+                                    </div>
+                                </div>
+                                <p class="small text-muted mt-2 mb-0">Usar para dormir y en momentos durante el día.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5 & 6. Hueso y Vaselina -->
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">5. Hueso de aceituna</h6>
+                                <p class="small text-muted">Llevar 1–2 en la boca cuando sea posible.</p>
+                                <hr>
+                                <h6 class="fw-bold text-success">6. Vaselina o cacao</h6>
+                                <p class="small text-muted mb-0">Aplicar cada 30 min. Frotar labios 10 veces.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Alimentación -->
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">7. Alimentación (Masticación)</h6>
+                                <div class="form-check">
+                                    {{ form.alimentacion_lado_derecho }}
+                                    <label class="form-check-label" for="{{ form.alimentacion_lado_derecho.id_for_label }}">Masticar por lado Derecho</label>
+                                </div>
+                                <div class="form-check">
+                                    {{ form.alimentacion_lado_izquierdo }}
+                                    <label class="form-check-label" for="{{ form.alimentacion_lado_izquierdo.id_for_label }}">Masticar por lado Izquierdo</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. Hábitos Alimenticios -->
+                    <div class="col-12">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">8. Hábitos alimenticios</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.habitos_fruta_entera }}
+                                            <label class="form-check-label" for="{{ form.habitos_fruta_entera.id_for_label }}">Comer fruta entera</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.habitos_evitar_carbonatadas }}
+                                            <label class="form-check-label" for="{{ form.habitos_evitar_carbonatadas.id_for_label }}">Evitar bebidas carbonatadas</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.habitos_reducir_refinados }}
+                                            <label class="form-check-label" for="{{ form.habitos_reducir_refinados.id_for_label }}">Reducir lácteos/azúcar/harinas</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 p-3 bg-white rounded border">
+                                    <strong class="d-block mb-2 text-primary">Regla 3 – 2 – 1 (para dormir bien):</strong>
+                                    <div class="d-flex gap-4 flex-wrap">
+                                        <div class="form-check">
+                                            {{ form.regla_no_comer_3h }}
+                                            <label class="form-check-label" for="{{ form.regla_no_comer_3h.id_for_label }}">No comer 3h antes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.regla_no_beber_2h }}
+                                            <label class="form-check-label" for="{{ form.regla_no_beber_2h.id_for_label }}">No beber 2h antes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.regla_no_pantallas_1h }}
+                                            <label class="form-check-label" for="{{ form.regla_no_pantallas_1h.id_for_label }}">No pantallas 1h antes</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. Ejercicio Físico -->
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">9. Ejercicio físico</h6>
+                                <div class="vstack gap-2">
+                                    <div class="form-check">
+                                        {{ form.ejercicio_caminata }}
+                                        <label class="form-check-label" for="{{ form.ejercicio_caminata.id_for_label }}">Caminata diaria (1 hora)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.ejercicio_caminata_huesito }}
+                                        <label class="form-check-label" for="{{ form.ejercicio_caminata_huesito.id_for_label }}">Caminata con huesito en boca</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.ejercicio_labios_pegados }}
+                                        <label class="form-check-label" for="{{ form.ejercicio_labios_pegados.id_for_label }}">Labios pegados durante caminata</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.ejercicio_pesas }}
+                                        <label class="form-check-label" for="{{ form.ejercicio_pesas.id_for_label }}">Levantar pesas (masa muscular)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. Hábitos Generales -->
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success">10. Hábitos generales</h6>
+                                <div class="form-check">
+                                    {{ form.habitos_reducir_tabaco_alcohol }}
+                                    <label class="form-check-label" for="{{ form.habitos_reducir_tabaco_alcohol.id_for_label }}">Reducir tabaco y alcohol (tarde)</label>
+                                </div>
+                                <div class="alert alert-warning mt-3 mb-0">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <strong>Nota:</strong> El éxito del programa depende de la CONSTANCIA. Realízalo todos los días.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+            <a href="{% url 'pacientes:detalle' paciente.pk %}" class="btn btn-light border btn-lg px-4">Cancelar</a>
+            <button type="submit" class="btn btn-success btn-lg px-5 shadow-sm">
+                <i class="bi bi-save"></i> Guardar Programa
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lista de Pacientes{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+        --hover-transform: translateY(-2px);
+    }
+    
+    .bg-gradient-primary {
+        background: var(--primary-gradient) !important;
+    }
+
+    .search-box {
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+    }
+    .search-box:focus {
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+        border-color: #86b7fe;
+    }
+
+    .table-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+
+    .table-custom thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        padding: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .table-custom tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .table-custom tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    .table-custom tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .avatar-initials {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        transform: var(--hover-transform);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Pacientes</h2>
+            <p class="text-muted mb-0">Gestión y seguimiento de historias clínicas</p>
+        </div>
+        <a href="{% url 'pacientes:crear' %}" class="btn btn-primary shadow-sm px-4 py-2 rounded-pill fw-medium">
+            <i class="bi bi-plus-lg me-2"></i>Nuevo Paciente
+        </a>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="card border-0 shadow-sm mb-4 rounded-4">
+        <div class="card-body p-2">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col">
+                    <div class="position-relative">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        <input type="text" name="q" class="form-control search-box ps-5 border-0" 
+                               placeholder="Buscar por nombre, DNI o teléfono..." 
+                               value="{{ request.GET.q|default:'' }}">
+                    </div>
+                </div>
+                <div class="col-auto d-flex gap-2">
+                    {% if request.GET.q %}
+                    <a href="{% url 'pacientes:lista' %}" class="btn btn-outline-secondary rounded-pill" title="Limpiar búsqueda">
+                        <i class="bi bi-x-lg me-1"></i>Limpiar
+                    </a>
+                    {% endif %}
+                    <button type="submit" class="btn btn-dark rounded-pill px-4">Buscar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Patient List -->
+    <div class="card table-card">
+        {% if pacientes %}
+            <div class="table-responsive">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Paciente</th>
+                            <th>Edad / Cumpleaños</th>
+                            <th>Contacto</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for paciente in pacientes %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-initials shadow-sm">
+                                        {{ paciente.nombre_completo|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark">{{ paciente.nombre_completo }}</h6>
+                                        <small class="text-muted font-monospace">{{ paciente.dni }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-medium">{{ paciente.edad }} años</span>
+                                    {% if paciente.dias_hasta_cumple == 0 %}
+                                        <span class="badge bg-warning text-dark rounded-pill w-auto mt-1">
+                                            <i class="bi bi-cake-fill me-1"></i>¡Hoy!
+                                        </span>
+                                    {% elif paciente.dias_hasta_cumple <= 30 %}
+                                        <small class="text-primary fw-bold mt-1">
+                                            <i class="bi bi-gift me-1"></i>En {{ paciente.dias_hasta_cumple }} días
+                                        </small>
+                                    {% else %}
+                                        <small class="text-muted">{{ paciente.fecha_nacimiento|date:"d M" }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    {% if paciente.telefono %}
+                                        <span class="text-dark"><i class="bi bi-telephone me-2 text-muted"></i>{{ paciente.telefono }}</span>
+                                    {% else %}
+                                        <span class="text-muted small">No registrado</span>
+                                    {% endif %}
+                                    
+                                    {% if paciente.email %}
+                                        <small class="text-muted mt-1"><i class="bi bi-envelope me-2"></i>{{ paciente.email|truncatechars:20 }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{% url 'pacientes:detalle' paciente.pk %}" 
+                                       class="action-btn btn-light text-primary" 
+                                       data-bs-toggle="tooltip" title="Ver Historia">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'pacientes:editar' paciente.pk %}" 
+                                       class="action-btn btn-light text-warning" 
+                                       data-bs-toggle="tooltip" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'pacientes:eliminar' paciente.pk %}" 
+                                       class="action-btn btn-light text-danger" 
+                                       onclick="return confirm('¿Eliminar a {{ paciente.nombre_completo }}?')"
+                                       data-bs-toggle="tooltip" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="card-footer bg-white border-0 py-3">
+                <nav>
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link border-0 text-muted" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link border-0 bg-primary shadow-sm rounded-circle mx-2" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                {{ page_obj.number }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link border-0 text-muted" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-people text-muted" style="font-size: 4rem; opacity: 0.2;"></i>
+                </div>
+                <h5 class="text-muted">No se encontraron pacientes</h5>
+                <p class="text-muted small mb-4">Intenta con otra búsqueda o registra un nuevo paciente.</p>
+                <a href="{% url 'pacientes:crear' %}" class="btn btn-outline-primary rounded-pill">
+                    Registrar Paciente
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

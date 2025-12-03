@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha Médica del Paciente - {{ paciente.nombre_completo }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #be185d;
+            --secondary: #a855f7;
+            --bg-gradient-start: #fdf2f8;
+            --bg-gradient-end: #fae8ff;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(236, 72, 153, 0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem;
+            border: none;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            padding: 0.75rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.3);
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Header Card -->
+        <div class="card mb-4">
+            <div class="card-header text-center">
+                <h1 class="mb-2"><i class="bi bi-clipboard2-pulse"></i> Ficha Médica del Paciente</h1>
+                <p class="mb-0">Por favor completa la siguiente información antes de tu cita</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> <strong>Paciente:</strong> {{ paciente.nombre_completo }}<br>
+                    <i class="bi bi-clock"></i> <strong>Link válido por:</strong> {{ dias_restantes }} días
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Sección 1: Datos Personales -->
+            <div class="section-card">
+                <h2 class="section-title"><i class="bi bi-person-fill"></i> Datos Personales</h2>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required">Correo Electrónico</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ocupación</label>
+                        {{ form.ocupacion }}
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label required">Dirección Completa</label>
+                        {{ form.direccion_completa }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Antecedentes Médicos -->
+            <div class="section-card">
+                <h2 class="section-title"><i class="bi bi-heart-pulse-fill"></i> Antecedentes Médicos</h2>
+                
+                <div class="mb-4">
+                    <div class="form-check">
+                        {{ form.tiene_enfermedades }}
+                        <label class="form-check-label required">¿Padece alguna enfermedad?</label>
+                    </div>
+                    <div class="mt-2" id="enfermedades-detalle">
+                        <label class="form-label">Si respondió sí, especifique cuál(es):</label>
+                        {{ form.enfermedades_detalle }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check">
+                        {{ form.toma_medicamentos }}
+                        <label class="form-check-label required">¿Toma medicamentos actualmente?</label>
+                    </div>
+                    <div class="mt-2" id="medicamentos-detalle">
+                        <label class="form-label">Si respondió sí, especifique cuál(es):</label>
+                        {{ form.medicamentos_detalle }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check">
+                        {{ form.tiene_alergias }}
+                        <label class="form-check-label required">¿Tiene alergias?</label>
+                    </div>
+                    <div class="mt-2" id="alergias-detalle">
+                        <label class="form-label">Si respondió sí, especifique a qué:</label>
+                        {{ form.alergias_detalle }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">¿Está embarazada? (solo mujeres)</label>
+                        {{ form.esta_embarazada }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            {{ form.tiene_cirugias_previas }}
+                            <label class="form-check-label">¿Ha tenido cirugías previas?</label>
+                        </div>
+                        <div class="mt-2">
+                            {{ form.cirugias_detalle }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Antecedentes Dentales -->
+            <div class="section-card">
+                <h2 class="section-title"><i class="bi bi-emoji-smile-fill"></i> Antecedentes Dentales</h2>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Última visita al dentista</label>
+                        {{ form.ultima_visita_dentista }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            {{ form.tiene_tratamientos_previos }}
+                            <label class="form-check-label">¿Ha tenido tratamientos dentales previos?</label>
+                        </div>
+                        <div class="mt-2">
+                            {{ form.tratamientos_previos_detalle }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label required">¿Tiene algún problema dental actualmente?</label>
+                    {{ form.problemas_dentales_actuales }}
+                    <small class="text-muted">Ej: Dolor, sangrado, sensibilidad, etc.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label required">Motivo de la consulta</label>
+                    {{ form.motivo_consulta }}
+                    <small class="text-muted">¿Por qué desea agendar una cita?</small>
+                </div>
+            </div>
+
+            <!-- Sección 4: Consentimientos -->
+            <div class="section-card">
+                <h2 class="section-title"><i class="bi bi-shield-check-fill"></i> Consentimientos</h2>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        {{ form.acepta_tratamiento_datos }}
+                        <label class="form-check-label required">
+                            Acepto el tratamiento de mis datos personales conforme a la Ley de Protección de Datos Personales
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        {{ form.acepta_contacto }}
+                        <label class="form-check-label required">
+                            Autorizo ser contactado por WhatsApp, Email o llamada telefónica
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón Enviar -->
+            <div class="text-center mb-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle"></i> Enviar Ficha Médica
+                </button>
+            </div>
+
+            <div class="text-center text-muted">
+                <small>Los campos marcados con <span class="text-danger">*</span> son obligatorios</small>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mostrar/ocultar campos condicionales
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleFields = [
+                {checkbox: 'id_tiene_enfermedades', detail: 'enfermedades-detalle'},
+                {checkbox: 'id_toma_medicamentos', detail: 'medicamentos-detalle'},
+                {checkbox: 'id_tiene_alergias', detail: 'alergias-detalle'}
+            ];
+
+            toggleFields.forEach(field => {
+                const checkbox = document.getElementById(field.checkbox);
+                const detail = document.getElementById(field.detail);
+                
+                if (checkbox && detail) {
+                    detail.style.display = checkbox.checked ? 'block' : 'none';
+                    checkbox.addEventListener('change', function() {
+                        detail.style.display = this.checked ? 'block' : 'none';
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

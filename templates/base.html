@@ -1,0 +1,488 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultorio Dental - {% block title %}Inicio{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/topbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* Tab styles for compatibility */
+        .nav-tabs .nav-link {
+            color: white;
+            background-color: #6c757d;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-radius: 6px 6px 0 0;
+            margin-right: 4px;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background-color: #8d17aa;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #198754;
+            box-shadow: 0 -2px 5px rgba(25, 135, 84, 0.3);
+            color: white;
+            font-weight: 600;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .tab-content {
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <!-- Sidebar Header -->
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <a href="{% url 'pacientes:lista' %}" class="sidebar-logo">
+                {% if config_consultorio.logo %}
+                <img src="{{ config_consultorio.logo.url }}" alt="Logo" class="sidebar-logo-icon" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px;">
+                {% else %}
+                <span class="sidebar-logo-icon">🦷</span>
+                {% endif %}
+                <span class="sidebar-logo-text">{{ config_consultorio.nombre_consultorio|default:"Consultorio Dental" }}</span>
+            </a>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="sidebar-menu">
+            <!-- Dashboard -->
+            <div class="menu-section">
+                <div class="menu-section-title">Principal</div>
+                <a href="{% url 'dashboard:index' %}" class="menu-item" data-tooltip="Dashboard">
+                    <i class="bi bi-speedometer2 menu-icon"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+            </div>
+
+            <!-- Pacientes -->
+            <div class="menu-section">
+                <div class="menu-section-title">Gestión</div>
+                <div class="menu-item" data-tooltip="Pacientes">
+                    <i class="bi bi-people menu-icon"></i>
+                    <span class="sidebar-text">Pacientes</span>
+                    <i class="bi bi-chevron-right menu-arrow"></i>
+                </div>
+                <div class="submenu">
+                    <a href="{% url 'pacientes:lista' %}" class="submenu-item">Lista de Pacientes</a>
+                    <a href="{% url 'pacientes:crear' %}" class="submenu-item">Nuevo Paciente</a>
+                    <a href="{% url 'pacientes:cumpleanos_proximos' %}" class="submenu-item">
+                        🎂 Cumpleaños
+                        {% if cumpleaneros_hoy_count > 0 %}
+                        <span class="menu-badge">{{ cumpleaneros_hoy_count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+            <!-- Historias Clínicas -->
+            <div class="menu-section">
+                <div class="menu-item" data-tooltip="Historias Clínicas">
+                    <i class="bi bi-journal-medical menu-icon"></i>
+                    <span class="sidebar-text">Historias Clínicas</span>
+                    <i class="bi bi-chevron-right menu-arrow"></i>
+                </div>
+                <div class="submenu">
+                    <a href="{% url 'historias:lista' %}" class="submenu-item">Ver Historias</a>
+                </div>
+            </div>
+            
+            <!-- Tratamientos -->
+            <div class="menu-section">
+                <div class="menu-item" data-tooltip="Tratamientos">
+                    <i class="bi bi-heart-pulse menu-icon"></i>
+                    <span class="sidebar-text">Tratamientos</span>
+                    <i class="bi bi-chevron-right menu-arrow"></i>
+                </div>
+                <div class="submenu">
+                    <a href="{% url 'tratamientos:lista' %}" class="submenu-item">Lista de Tratamientos</a>
+                    <a href="{% url 'tratamientos:lista' %}" class="submenu-item">Por Estado</a>
+                    <a href="{% url 'tratamientos:lista_pagos' %}" class="submenu-item">
+                        <i class="bi bi-receipt"></i> Pagos
+                    </a>
+
+
+
+                </div>
+            </div>
+
+            <!-- Notas -->
+            <div class="menu-section">
+                <a href="{% url 'notas:lista' %}" class="menu-item" data-tooltip="Notas">
+                    <i class="bi bi-sticky menu-icon"></i>
+                    <span class="sidebar-text">Notas</span>
+                </a>
+            </div>
+            
+            <!-- Citas -->
+            <div class="menu-section">
+                <div class="menu-item" data-tooltip="Citas">
+                    <i class="bi bi-calendar-event menu-icon"></i>
+                    <span class="sidebar-text">Citas</span>
+                    <i class="bi bi-chevron-right menu-arrow"></i>
+                </div>
+                <div class="submenu">
+                    <a href="{% url 'calendario' %}" class="submenu-item">Calendario</a>
+                    <a href="{% url 'lista_eventos' %}" class="submenu-item">Lista de Eventos</a>
+                </div>
+            </div>
+
+            <!-- Finanzas -->
+            <div class="menu-section">
+                <div class="menu-section-title">Finanzas</div>
+                <div class="menu-item" data-tooltip="Finanzas">
+                    <i class="bi bi-cash-stack menu-icon"></i>
+                    <span class="sidebar-text">Finanzas</span>
+                    <i class="bi bi-chevron-right menu-arrow"></i>
+                </div>
+                <div class="submenu">
+
+                    <a href="{% url 'pacientes:deudas' %}" class="submenu-item">
+                        <i class="bi bi-wallet2"></i> Cuentas por Cobrar
+                    </a>
+                    <a href="{% url 'pacientes:reportes' %}" class="submenu-item">
+                        <i class="bi bi-graph-up"></i> Reportes Financieros
+                    </a>
+                    {% if user.is_superuser or user.groups.all.0.name == 'Administrador' %}
+                    <a href="{% url 'dashboard:estadisticas' %}" class="submenu-item">
+                        <i class="bi bi-graph-up-arrow"></i> Estadísticas Avanzadas
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Auditoría (Solo Admin y Superusuario) -->
+            {% if user.is_superuser or user.groups.all.0.name == 'Administrador' %}
+            <div class="menu-section">
+                <div class="menu-section-title">Sistema</div>
+                <a href="{% url 'auditoria:logs_sistema' %}" class="menu-item" data-tooltip="Logs del Sistema">
+                    <i class="bi bi-shield-lock menu-icon"></i>
+                    <span class="sidebar-text">Auditoría</span>
+                </a>
+            </div>
+            {% endif %}
+
+
+
+
+            <!-- Configuración -->
+            <div class="menu-section">
+                <div class="menu-section-title">Sistema</div>
+                <div class="menu-item" data-tooltip="Configuración">
+                    <i class="bi bi-gear menu-icon"></i>
+                    <span class="sidebar-text">Configuración</span>
+                    <i class="bi bi-chevron-right menu-arrow"></i>
+                </div>
+                <div class="submenu">
+                    <a href="{% url 'usuarios:lista' %}" class="submenu-item">Usuarios</a>
+                    <a href="{% url 'configuracion:configuracion' %}" class="submenu-item">Consultorio</a>
+                    <a href="#" class="submenu-item">Programa Salud</a>
+                    <a href="#" class="submenu-item">Protocolo Niños</a>
+                    <a href="#" class="submenu-item">Citas</a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+        <!-- Top Bar -->
+        <nav class="top-bar">
+            <!-- Sidebar Toggle -->
+            <button id="sidebarToggle" class="sidebar-toggle">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Buscar pacientes, tratamientos..."
+                    >
+                    <span class="search-shortcut">Ctrl+K</span>
+                    
+                    <!-- Search Results Dropdown -->
+                    <div id="searchResults" class="search-results">
+                        <div class="search-result-item">
+                            <div class="search-result-title">No hay resultados</div>
+                            <div class="search-result-meta">Intenta con otro término</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Bar Actions -->
+            <div class="topbar-actions">
+                <!-- Notifications -->
+                <div style="position: relative;">
+                    <button id="notificationBtn" class="topbar-btn">
+                        <i class="bi bi-bell"></i>
+                        {% if cumpleaneros_hoy_count > 0 or citas_pendientes_count > 0 %}
+                        <span class="topbar-btn-badge">{{ cumpleaneros_hoy_count|add:citas_pendientes_count }}</span>
+                        {% endif %}
+                    </button>
+                    
+                    <!-- Notifications Dropdown -->
+                    <div id="notificationsDropdown" class="notifications-dropdown">
+                        <div class="notifications-header">
+                            <span class="notifications-title">Notificaciones</span>
+                            <button class="notifications-clear">Marcar como leídas</button>
+                        </div>
+                        <div class="notifications-list">
+                            {% if citas_pendientes_hoy %}
+                                {% for cita in citas_pendientes_hoy %}
+                                <div class="notification-item unread" style="display: flex; align-items: center;">
+                                    <div class="notification-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Cita Pendiente</div>
+                                        <div class="notification-text">{{ cita.name }} - {{ cita.local_begin|date:"H:i" }}</div>
+                                        <div class="notification-time">Hoy</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                            {% if cumpleaneros_hoy %}
+                                {% for paciente in cumpleaneros_hoy %}
+                                <div class="notification-item unread" style="display: flex; align-items: center;">
+                                    <div class="notification-icon birthday">
+                                        <i class="bi bi-cake2"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">¡Cumpleaños!</div>
+                                        <div class="notification-text">{{ paciente.nombre_completo }} cumple {{ paciente.edad }} años hoy</div>
+                                        <div class="notification-time">Hoy</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                            {% if not citas_pendientes_hoy and not cumpleaneros_hoy %}
+                            <div class="notification-item">
+                                <div class="notification-content">
+                                    <div class="notification-text" style="text-align: center; padding: 1rem;">
+                                        No hay notificaciones nuevas
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Menu -->
+                <div class="user-menu">
+                    <button id="userBtn" class="user-btn">
+                        <div class="user-avatar">
+                            {% if user.is_authenticated %}
+                                {{ user.username|slice:":1"|upper }}
+                            {% else %}
+                                U
+                            {% endif %}
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name">
+                                {% if user.is_authenticated %}
+                                    {{ user.username }}
+                                {% else %}
+                                    Usuario
+                                {% endif %}
+                            </div>
+                            <div class="user-role">Administrador</div>
+                        </div>
+                    </button>
+                    
+                    <!-- User Dropdown -->
+                    <div id="userDropdown" class="user-dropdown">
+                        <a href="#" class="user-dropdown-item">
+                            <i class="bi bi-person"></i>
+                            Mi Perfil
+                        </a>
+                        <a href="#" class="user-dropdown-item">
+                            <i class="bi bi-gear"></i>
+                            Configuración
+                        </a>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="{% url 'usuarios:logout' %}" class="user-dropdown-item">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="content-area">
+            <!-- Messages -->
+            {% if messages %}
+            <div class="content-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Page Content -->
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <!-- Quick Actions Button -->
+    <button class="quick-actions-btn">
+        <i class="bi bi-plus-lg"></i>
+    </button>
+
+    <!-- Quick Actions Menu -->
+    <div class="quick-actions-menu">
+        <a href="{% url 'pacientes:crear' %}" class="quick-action-item">
+            <div class="quick-action-icon primary">
+                <i class="bi bi-person-plus"></i>
+            </div>
+            <span>Nuevo Paciente</span>
+        </a>
+        <a href="{% url 'tratamientos:lista' %}" class="quick-action-item">
+            <div class="quick-action-icon success">
+                <i class="bi bi-heart-pulse"></i>
+            </div>
+            <span>Nuevo Tratamiento</span>
+        </a>
+        <a href="{% url 'tratamientos:lista_pagos' %}" class="quick-action-item">
+            <div class="quick-action-icon warning">
+                <i class="bi bi-cash"></i>
+            </div>
+            <span>Registrar Pago</span>
+        </a>
+        <a href="{% url 'notas:lista' %}" class="quick-action-item">
+            <div class="quick-action-icon purple">
+                <i class="bi bi-sticky"></i>
+            </div>
+            <span>Nueva Nota</span>
+        </a>
+    </div>
+
+    <!-- Toast de citas pendientes -->
+    {% if citas_pendientes_count > 0 %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+        <div id="appointmentToast" class="toast align-items-center border-0" role="alert"
+            aria-live="assertive" aria-atomic="true" data-bs-delay="8000"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <strong>📅 Citas Pendientes de Hoy</strong><br>
+                    Tienes {{ citas_pendientes_count }} cita{{ citas_pendientes_count|pluralize }} pendiente{{ citas_pendientes_count|pluralize }}:
+                    <ul class="mb-0 mt-2" style="font-size: 0.9em;">
+                        {% for cita in citas_pendientes_hoy %}
+                        <li><strong>{{ cita.local_begin|date:"H:i" }}</strong> - {{ cita.name }}{% if cita.location %} ({{ cita.location }}){% endif %}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Toast de cumpleaños -->
+    {% if cumpleaneros_hoy_count > 0 %}
+    <div class="toast-container position-fixed bottom-0 start-0 p-3" style="z-index: 1100;">
+        <div id="birthdayToast" class="toast align-items-center text-bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <strong>🎂 ¡Feliz Cumpleaños!</strong><br>
+                    Hoy cumplen años:
+                    <ul class="mb-0 mt-2" style="font-size: 0.9em;">
+                        {% for paciente in cumpleaneros_hoy %}
+                        <li>{{ paciente.nombre_completo }} ({{ paciente.edad }} años)</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/sidebar.js' %}"></script>
+    <script src="{% static 'js/search.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+
+    <!-- Appointment Toast Script -->
+    {% if citas_pendientes_count > 0 %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastEl = document.getElementById('appointmentToast');
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+    </script>
+    {% endif %}
+
+    <!-- Birthday Toast Script -->
+    {% if cumpleaneros_hoy_count > 0 %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastEl = document.getElementById('birthdayToast');
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+    </script>
+    {% endif %}
+</body>
+
+</html>

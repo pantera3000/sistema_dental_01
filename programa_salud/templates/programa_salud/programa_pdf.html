@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Programa Salud-Confort - {{ paciente.nombre_completo }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 9px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .header {
+            border-bottom: 4px solid #2c3e50;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-subtitle {
+            font-size: 11px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .patient-info {
+            border: 2px solid #34495e;
+            padding: 15px;
+            margin-bottom: 25px;
+            background-color: #ffffff;
+        }
+
+        .patient-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .patient-info td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .patient-info tr:last-child td {
+            border-bottom: none;
+        }
+
+        .patient-info .label {
+            font-weight: 600;
+            color: #7f8c8d;
+            font-size: 8px;
+            text-transform: uppercase;
+            width: 25%;
+        }
+
+        .patient-info .value {
+            font-weight: 600;
+            font-size: 10px;
+            color: #2c3e50;
+        }
+
+        .section {
+            margin-bottom: 18px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding: 7px 12px;
+            background-color: #ecf0f1;
+            border-left: 4px solid #27ae60;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subsection {
+            margin-top: 12px;
+            padding-left: 15px;
+            border-left: 2px solid #bdc3c7;
+        }
+
+        .subsection-title {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 10px;
+            padding: 5px 0;
+        }
+
+        .field-row {
+            padding: 7px 12px;
+            border-bottom: 1px solid #ecf0f1;
+            display: table;
+            width: 100%;
+        }
+
+        .field-row:last-child {
+            border-bottom: none;
+        }
+
+        .field-label {
+            font-weight: 500;
+            color: #555;
+            display: table-cell;
+            width: 70%;
+            font-size: 9px;
+        }
+
+        .field-value {
+            display: table-cell;
+            text-align: right;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 9px;
+        }
+
+        .checkbox-yes {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .checkbox-no {
+            color: #bdc3c7;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border: 1px solid #34495e;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            background-color: #fff;
+        }
+
+        .signature-section {
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+
+        .signature-box {
+            width: 300px;
+            border-top: 2px solid #2c3e50;
+            text-align: center;
+            padding-top: 10px;
+            margin-top: 60px;
+            float: right;
+            font-size: 9px;
+            color: #555;
+        }
+        
+        table.data-grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table.data-grid td {
+            padding: 7px 12px;
+            border-bottom: 1px solid #ecf0f1;
+            vertical-align: top;
+        }
+
+        .footer-note {
+            margin-top: 35px;
+            text-align: center;
+            font-size: 8px;
+            color: #95a5a6;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 12px;
+        }
+
+        .text-content {
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            background-color: #fafafa;
+            min-height: 30px;
+            font-size: 9px;
+            line-height: 1.6;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="header-title">Programa Salud-Confort</h1>
+        <div class="header-subtitle">Plan Integral de Bienestar | Fecha: {% now "d \d\e F \d\e Y" %}</div>
+    </div>
+
+    <div class="patient-info">
+        <table>
+            <tr>
+                <td class="label">Paciente:</td>
+                <td class="value">{{ paciente.nombre_completo }}</td>
+                <td class="label">Edad:</td>
+                <td class="value">{{ paciente.edad }} años</td>
+            </tr>
+            <tr>
+                <td class="label">DNI:</td>
+                <td class="value">{{ paciente.dni|default:"-" }}</td>
+                <td class="label">Fecha Nac.:</td>
+                <td class="value">{{ paciente.fecha_nacimiento|date:"d/m/Y" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Hábitos Generales</div>
+        <table class="data-grid">
+            <tr>
+                <td>
+                    <strong>Fumador:</strong>
+                    <span class="{% if programa.es_fumador %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                        {% if programa.es_fumador %}✓ SÍ{% else %}✗ NO{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <strong>Bebedor:</strong>
+                    <span class="{% if programa.es_bebedor %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                        {% if programa.es_bebedor %}✓ SÍ{% else %}✗ NO{% endif %}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Evaluación de Funciones</div>
+        <div class="field-row">
+            <span class="field-label">Masticación predominante</span>
+            <span class="field-value"><span class="badge">{{ programa.get_masticacion_lado_display|default:"-" }}</span></span>
+        </div>
+        <div class="field-row">
+            <span class="field-label">Ventana nasal predominante</span>
+            <span class="field-value"><span class="badge">{{ programa.get_ventana_nasal_predominante_display|default:"-" }}</span></span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Síndrome Simpático Silencioso (SSS)</div>
+        <table class="data-grid">
+            <tr>
+                <td>Respiración oral / Boca seca: <span class="{% if programa.sss_respiracion_oral %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_respiracion_oral %}✓{% else %}✗{% endif %}</span></td>
+                <td>Calidad del sueño / Ronquido: <span class="{% if programa.sss_calidad_sueno %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_calidad_sueno %}✓{% else %}✗{% endif %}</span></td>
+            </tr>
+            <tr>
+                <td>Gingivitis / Periodontal: <span class="{% if programa.sss_gingivitis %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_gingivitis %}✓{% else %}✗{% endif %}</span></td>
+                <td>Faringitis crónica: <span class="{% if programa.sss_faringitis %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_faringitis %}✓{% else %}✗{% endif %}</span></td>
+            </tr>
+            <tr>
+                <td>Desorden ATM / Bruxismo: <span class="{% if programa.sss_atm %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_atm %}✓{% else %}✗{% endif %}</span></td>
+                <td>Reflujo / Digestivos: <span class="{% if programa.sss_reflujo %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_reflujo %}✓{% else %}✗{% endif %}</span></td>
+            </tr>
+            <tr>
+                <td>Cefaleas / Migrañas: <span class="{% if programa.sss_cefaleas %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_cefaleas %}✓{% else %}✗{% endif %}</span></td>
+                <td>Dolor cervical: <span class="{% if programa.sss_cervical %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_cervical %}✓{% else %}✗{% endif %}</span></td>
+            </tr>
+            <tr>
+                <td>Patología homolateral: <span class="{% if programa.sss_patologia_homolateral %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_patologia_homolateral %}✓{% else %}✗{% endif %}</span></td>
+                <td>Masticación unilateral: <span class="{% if programa.sss_masticacion_unilateral %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_masticacion_unilateral %}✓{% else %}✗{% endif %}</span></td>
+            </tr>
+            <tr>
+                <td>Astenia / Agotamiento: <span class="{% if programa.sss_astenia %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_astenia %}✓{% else %}✗{% endif %}</span></td>
+                <td>Ansiedad / Depresión: <span class="{% if programa.sss_ansiedad %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_ansiedad %}✓{% else %}✗{% endif %}</span></td>
+            </tr>
+            <tr>
+                <td>Alergias / Rinitis / Asma: <span class="{% if programa.sss_alergias %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_alergias %}✓{% else %}✗{% endif %}</span></td>
+                <td>Hipertensión / Cardiovascular: <span class="{% if programa.sss_hipertension %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.sss_hipertension %}✓{% else %}✗{% endif %}</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Antecedentes Médicos</div>
+        <div style="font-weight: 600; margin-bottom: 5px;">Otras patologías:</div>
+        <div class="text-content">{{ programa.otras_patologias|default:"-" }}</div>
+        
+        <div style="font-weight: 600; margin: 10px 0 5px 0;">Medicación:</div>
+        <div class="text-content">{{ programa.medicacion|default:"-" }}</div>
+        
+        <div style="font-weight: 600; margin: 10px 0 5px 0;">Intervenciones previas:</div>
+        <div class="text-content">{{ programa.intervenciones_previas|default:"-" }}</div>
+        
+        <div style="font-weight: 600; margin: 10px 0 5px 0;">Ejercicio físico (Antecedentes):</div>
+        <div class="text-content">{{ programa.ejercicio_fisico_antecedentes|default:"-" }}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Actividades Diarias del Programa</div>
+        
+        <div class="subsection">
+            <div class="subsection-title">1. Enjuagues con aceite de oliva</div>
+            <table class="data-grid">
+                <tr>
+                    <td>Mañana: <span class="{% if programa.enjuagues_manana %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.enjuagues_manana %}✓{% else %}✗{% endif %}</span></td>
+                    <td>Tarde: <span class="{% if programa.enjuagues_tarde %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.enjuagues_tarde %}✓{% else %}✗{% endif %}</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="subsection">
+            <div class="subsection-title">2. PlacaConfort / DegluConfort</div>
+            <div class="field-row">
+                <span class="field-label">Talla</span>
+                <span class="field-value"><span class="badge">{{ programa.placa_talla|default:"-" }}</span></span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Usar 3 ratos al día (relajación)</span>
+                <span class="field-value {% if programa.placa_uso_relajacion %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.placa_uso_relajacion %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Usar todas las noches (dormir)</span>
+                <span class="field-value {% if programa.placa_uso_noche %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.placa_uso_noche %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="subsection-title">3. NarizConfort</div>
+            <div class="field-row">
+                <span class="field-label">Talla</span>
+                <span class="field-value"><span class="badge">{{ programa.nariz_talla|default:"-" }}</span></span>
+            </div>
+            <table class="data-grid">
+                <tr>
+                    <td>Uso Derecho: <span class="{% if programa.nariz_uso_derecho %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.nariz_uso_derecho %}✓{% else %}✗{% endif %}</span></td>
+                    <td>Uso Izquierdo: <span class="{% if programa.nariz_uso_izquierdo %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.nariz_uso_izquierdo %}✓{% else %}✗{% endif %}</span></td>
+                </tr>
+            </table>
+            <div class="field-row">
+                <span class="field-label">Uso Bilateral</span>
+                <span class="field-value {% if programa.nariz_uso_bilateral %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.nariz_uso_bilateral %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="subsection-title">4. Alimentación</div>
+            <table class="data-grid">
+                <tr>
+                    <td>Masticar lado Derecho: <span class="{% if programa.alimentacion_lado_derecho %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.alimentacion_lado_derecho %}✓{% else %}✗{% endif %}</span></td>
+                    <td>Masticar lado Izquierdo: <span class="{% if programa.alimentacion_lado_izquierdo %}checkbox-yes{% else %}checkbox-no{% endif %}">{% if programa.alimentacion_lado_izquierdo %}✓{% else %}✗{% endif %}</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="subsection">
+            <div class="subsection-title">5. Hábitos Alimenticios</div>
+            <div class="field-row">
+                <span class="field-label">Comer fruta entera, a bocados</span>
+                <span class="field-value {% if programa.habitos_fruta_entera %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.habitos_fruta_entera %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Evitar bebidas carbonatadas</span>
+                <span class="field-value {% if programa.habitos_evitar_carbonatadas %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.habitos_evitar_carbonatadas %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Reducir lácteos / Azúcar / Sal / Harinas</span>
+                <span class="field-value {% if programa.habitos_reducir_refinados %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.habitos_reducir_refinados %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="subsection-title">6. Regla 3-2-1</div>
+            <div class="field-row">
+                <span class="field-label">No comer 3h antes de dormir</span>
+                <span class="field-value {% if programa.regla_no_comer_3h %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.regla_no_comer_3h %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">No beber 2h antes</span>
+                <span class="field-value {% if programa.regla_no_beber_2h %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.regla_no_beber_2h %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">No pantallas 1h antes</span>
+                <span class="field-value {% if programa.regla_no_pantallas_1h %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.regla_no_pantallas_1h %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="subsection-title">7. Ejercicio Físico</div>
+            <div class="field-row">
+                <span class="field-label">Caminata diaria (1 hora)</span>
+                <span class="field-value {% if programa.ejercicio_caminata %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.ejercicio_caminata %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Caminata con huesito en la boca</span>
+                <span class="field-value {% if programa.ejercicio_caminata_huesito %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.ejercicio_caminata_huesito %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Labios bien pegados durante caminata</span>
+                <span class="field-value {% if programa.ejercicio_labios_pegados %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.ejercicio_labios_pegados %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Levantar pesas (ganar masa muscular)</span>
+                <span class="field-value {% if programa.ejercicio_pesas %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.ejercicio_pesas %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="subsection-title">8. Hábitos Saludables</div>
+            <div class="field-row">
+                <span class="field-label">Reducir tabaco y alcohol</span>
+                <span class="field-value {% if programa.habitos_reducir_tabaco_alcohol %}checkbox-yes{% else %}checkbox-no{% endif %}">
+                    {% if programa.habitos_reducir_tabaco_alcohol %}✓{% else %}✗{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            Firma y Sello del Profesional
+        </div>
+    </div>
+
+    <div class="footer-note">
+        Consultorio Dental | Documento generado el {% now "d/m/Y" %}
+    </div>
+</body>
+</html>

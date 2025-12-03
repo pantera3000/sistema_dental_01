@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reportes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reports-container {
+        padding: 2rem 0;
+    }
+
+    .report-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .report-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .report-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .report-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+
+    .report-icon.debt {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    }
+
+    .report-icon.treatments {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .report-icon.financial {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .report-icon.stats {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .report-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        color: white;
+        margin-bottom: 1rem;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: scale(1.02);
+    }
+
+    .stat-card.success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .stat-card.warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .stat-card.info {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.95;
+        font-weight: 500;
+    }
+
+    .patient-list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        background: #f8f9fa;
+        transition: all 0.2s;
+    }
+
+    .patient-list-item:hover {
+        background: #e9ecef;
+        transform: translateX(4px);
+    }
+
+    .patient-info {
+        flex: 1;
+    }
+
+    .patient-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .patient-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .patient-value {
+        text-align: right;
+        margin-left: 1rem;
+    }
+
+    .amount {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .amount.debt {
+        color: #dc3545;
+    }
+
+    .amount.success {
+        color: #28a745;
+    }
+
+    .percentage-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    .percentage-badge.high {
+        background: #fee;
+        color: #dc3545;
+    }
+
+    .percentage-badge.medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .percentage-badge.low {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 4px;
+        background: #e9ecef;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transition: width 0.3s ease;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2rem;
+    }
+
+    .page-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.95;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container reports-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="bi bi-graph-up"></i> Reportes del Consultorio</h1>
+        <p>Análisis financiero y estadísticas de pacientes y tratamientos</p>
+    </div>
+
+    <!-- Financial Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card success">
+                <div class="stat-label">Total Ingresos</div>
+                <div class="stat-value">S/ {{ total_ingresos|floatformat:2 }}</div>
+                <small><i class="bi bi-cash-stack"></i> Todos los pagos recibidos</small>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card warning">
+                <div class="stat-label">Deudas Pendientes</div>
+                <div class="stat-value">S/ {{ total_deudas|floatformat:2 }}</div>
+                <small><i class="bi bi-exclamation-triangle"></i> Por cobrar</small>
+            </div>
+        </div>
+        <!-- <div class="col-md-3 col-sm-6">
+            <div class="stat-card info">
+                <div class="stat-label">Ingresos de {{ nombre_mes }}</div>
+                <div class="stat-value">S/ {{ pagos_mes|floatformat:2 }}</div>
+                <small><i class="bi bi-calendar-check"></i> Mes actual</small>
+            </div>
+        </div> -->
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-label">Total Tratamientos</div>
+                <div class="stat-value">{{ stats_tratamientos.total }}</div>
+                <small><i class="bi bi-clipboard-pulse"></i> Registrados</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients with Highest Debt -->
+    <div class="report-card">
+        <div class="report-card-header">
+            <div class="report-icon debt">
+                <i class="bi bi-exclamation-circle text-white"></i>
+            </div>
+            <div>
+                <h2 class="report-title">Pacientes con Mayor Deuda</h2>
+                <p class="text-muted mb-0">Top 10 pacientes con saldo pendiente</p>
+            </div>
+        </div>
+
+        {% if top_deudores %}
+            {% for item in top_deudores %}
+            <div class="patient-list-item">
+                <div class="patient-info">
+                    <div class="patient-name">
+                        <a href="{% url 'pacientes:detalle' item.paciente.pk %}" class="text-decoration-none">
+                            {{ forloop.counter }}. {{ item.paciente.nombre_completo }}
+                        </a>
+                    </div>
+                    <div class="patient-meta">
+                        DNI: {{ item.paciente.dni }} | Total: S/ {{ item.costo_total|floatformat:2 }}
+                    </div>
+                    <div class="progress-bar-custom">
+                        <div class="progress-fill" style="width: {{ item.porcentaje_deuda }}%; background: linear-gradient(90deg, #ff6b6b 0%, #ee5a6f 100%);"></div>
+                    </div>
+                </div>
+                <div class="patient-value">
+                    <div class="amount debt">S/ {{ item.deuda_total|floatformat:2 }}</div>
+                    <span class="percentage-badge {% if item.porcentaje_deuda >= 70 %}high{% elif item.porcentaje_deuda >= 40 %}medium{% else %}low{% endif %}">
+                        {{ item.porcentaje_deuda }}% deuda
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-check-circle"></i>
+                <p>¡Excelente! No hay deudas pendientes</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Patients with Most Treatments -->
+    <div class="report-card">
+        <div class="report-card-header">
+            <div class="report-icon treatments">
+                <i class="bi bi-heart-pulse text-white"></i>
+            </div>
+            <div>
+                <h2 class="report-title">Pacientes con Más Tratamientos</h2>
+                <p class="text-muted mb-0">Top 10 pacientes más activos</p>
+            </div>
+        </div>
+
+        {% if pacientes_con_tratamientos %}
+            {% for paciente in pacientes_con_tratamientos %}
+            <div class="patient-list-item">
+                <div class="patient-info">
+                    <div class="patient-name">
+                        <a href="{% url 'pacientes:detalle' paciente.pk %}" class="text-decoration-none">
+                            {{ forloop.counter }}. {{ paciente.nombre_completo }}
+                        </a>
+                    </div>
+                    <div class="patient-meta">
+                        DNI: {{ paciente.dni }} | Edad: {{ paciente.edad }} años
+                    </div>
+                </div>
+                <div class="patient-value">
+                    <div class="amount success">{{ paciente.num_tratamientos }}</div>
+                    <small class="text-muted">tratamiento{{ paciente.num_tratamientos|pluralize }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>No hay tratamientos registrados</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Treatment Statistics -->
+    <div class="report-card">
+        <div class="report-card-header">
+            <div class="report-icon stats">
+                <i class="bi bi-bar-chart text-white"></i>
+            </div>
+            <div>
+                <h2 class="report-title">Estadísticas de Tratamientos</h2>
+                <p class="text-muted mb-0">Distribución por estado</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center p-3">
+                    <div style="font-size: 3rem; color: #6c757d;">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div class="stat-value" style="color: #6c757d;">{{ stats_tratamientos.pendiente }}</div>
+                    <div class="stat-label" style="color: #6c757d;">Pendientes</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-3">
+                    <div style="font-size: 3rem; color: #0d6efd;">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                    <div class="stat-value" style="color: #0d6efd;">{{ stats_tratamientos.en_progreso }}</div>
+                    <div class="stat-label" style="color: #0d6efd;">En Progreso</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-3">
+                    <div style="font-size: 3rem; color: #28a745;">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stat-value" style="color: #28a745;">{{ stats_tratamientos.completado }}</div>
+                    <div class="stat-label" style="color: #28a745;">Completados</div>
+                </div>
+            </div>
+        </div>
+
+        {% if stats_tratamientos.total > 0 %}
+        <div class="mt-4">
+            <div class="d-flex justify-content-between mb-2">
+                <span>Tasa de Completitud</span>
+                <span><strong>{{ stats_tratamientos.completado|floatformat:0 }} / {{ stats_tratamientos.total }}</strong></span>
+            </div>
+            <div class="progress-bar-custom" style="height: 12px;">
+                <div class="progress-fill" style="width: {% widthratio stats_tratamientos.completado stats_tratamientos.total 100 %}%; background: linear-gradient(90deg, #28a745 0%, #20c997 100%);"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

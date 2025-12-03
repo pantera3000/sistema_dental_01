@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Paciente{% if config_consultorio %} - {{ config_consultorio.nombre_consultorio }}{% endif %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #be185d;
+            --secondary: #a855f7;
+            --bg-light: #fef3f8;
+        }
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fef3f8 0%, #fae8ff 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Patrón dental de fondo sutil */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/images/pattern.png');
+            background-repeat: repeat;
+            background-size: 400px;
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .form-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Header mejorado con logo */
+        .brand-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(236, 72, 153, 0.1);
+            text-align: center;
+        }
+        
+        .brand-logo {
+            max-width: 120px;
+            max-height: 120px;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+        
+        .brand-name {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .brand-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(236, 72, 153, 0.1);
+            overflow: hidden;
+            background: white;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border: none;
+        }
+        
+        .card-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .section-title {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #fce7f3;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-title i {
+            font-size: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            padding: 0.75rem;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 3rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            font-size: 0.95rem;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #ef4444;
+            font-weight: 700;
+        }
+        
+        .text-muted {
+            font-size: 0.85rem;
+        }
+        
+        /* Animación suave al cargar */
+        .section-card {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Header con Logo y Nombre del Consultorio -->
+        <div class="brand-header">
+            {% if config_consultorio and config_consultorio.logo %}
+                <img src="{{ config_consultorio.logo.url }}" alt="Logo" class="brand-logo">
+            {% else %}
+                <i class="bi bi-heart-pulse-fill" style="font-size: 4rem; color: var(--primary);"></i>
+            {% endif %}
+            <h1 class="brand-name">
+                {% if config_consultorio %}
+                    {{ config_consultorio.nombre_consultorio }}
+                {% else %}
+                    Consultorio Dental
+                {% endif %}
+            </h1>
+            <p class="brand-subtitle">Registro de Nuevo Paciente</p>
+        </div>
+
+        <!-- Formulario -->
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-danger mb-4">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <strong>Error:</strong> Por favor corrige los errores abajo.
+            </div>
+            {% endif %}
+            
+            <!-- Sección 1: Datos Personales -->
+            <div class="section-card">
+                <h2 class="section-title">
+                    <i class="bi bi-person-fill"></i>
+                    Datos Personales
+                </h2>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required">Nombre Completo del Paciente</label>
+                        {{ form.nombre_completo }}
+                        {% if form.nombre_completo.errors %}
+                        <div class="text-danger small">{{ form.nombre_completo.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required">DNI</label>
+                        {{ form.dni }}
+                        {% if form.dni.errors %}
+                        <div class="text-danger small">{{ form.dni.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label required">Fecha de Nacimiento</label>
+                        {{ form.fecha_nacimiento }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label required">Género</label>
+                        {{ form.genero }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label required">Teléfono</label>
+                        {{ form.telefono }}
+                    </div>
+                </div>
+                
+                <!-- Campo condicional para menores de edad -->
+                <div class="row" id="tutor-section" style="display: none;">
+                    <div class="col-12 mb-3">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill"></i> 
+                            <strong>Paciente menor de edad:</strong> Por favor indica el nombre del padre, madre o tutor legal.
+                        </div>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label required">Nombre del Padre/Madre/Tutor</label>
+                        {{ form.nombre_tutor }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Dirección</label>
+                        {{ form.direccion }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Antecedentes Médicos -->
+            <div class="section-card">
+                <h2 class="section-title">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    Antecedentes Médicos <span class="text-muted" style="font-size: 0.9rem;">(Opcional)</span>
+                </h2>
+                
+                <div class="mb-4">
+                    <div class="form-check">
+                        {{ form.tiene_enfermedades }}
+                        <label class="form-check-label">¿Padece alguna enfermedad?</label>
+                    </div>
+                    <div class="mt-2">
+                        {{ form.enfermedades_detalle }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check">
+                        {{ form.tiene_alergias }}
+                        <label class="form-check-label">¿Tiene alergias?</label>
+                    </div>
+                    <div class="mt-2">
+                        {{ form.alergias_detalle }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check">
+                        {{ form.toma_medicamentos }}
+                        <label class="form-check-label">¿Toma medicamentos?</label>
+                    </div>
+                    <div class="mt-2">
+                        {{ form.medicamentos_detalle }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Motivo de Consulta -->
+            <div class="section-card">
+                <h2 class="section-title">
+                    <i class="bi bi-chat-left-text-fill"></i>
+                    Motivo de Consulta <span class="text-muted" style="font-size: 0.9rem;">(Opcional)</span>
+                </h2>
+                <div class="mb-3">
+                    <label class="form-label">¿Por qué deseas agendar una cita?</label>
+                    {{ form.motivo_consulta }}
+                    <small class="text-muted">Puedes dejarlo en blanco si ya estás en el consultorio</small>
+                </div>
+            </div>
+
+            <!-- Sección 4: Consentimientos -->
+            <div class="section-card">
+                <h2 class="section-title">
+                    <i class="bi bi-shield-check-fill"></i>
+                    Consentimientos
+                </h2>
+                <div class="mb-3">
+                    <div class="form-check">
+                        {{ form.acepta_tratamiento_datos }}
+                        <label class="form-check-label required">
+                            Acepto el tratamiento de mis datos personales
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check">
+                        {{ form.acepta_contacto }}
+                        <label class="form-check-label">
+                            Autorizo ser contactado por WhatsApp, Email o teléfono
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mb-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle-fill"></i> Registrarme
+                </button>
+            </div>
+
+            <div class="text-center text-muted">
+                <small>Los campos marcados con <span class="text-danger">*</span> son obligatorios</small>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Calcular edad y mostrar/ocultar campo de tutor
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaNacimiento = document.getElementById('id_fecha_nacimiento');
+            const tutorSection = document.getElementById('tutor-section');
+            const nombreTutor = document.getElementById('id_nombre_tutor');
+            
+            function calcularEdad(fechaNac) {
+                if (!fechaNac) return null;
+                const hoy = new Date();
+                const nacimiento = new Date(fechaNac);
+                let edad = hoy.getFullYear() - nacimiento.getFullYear();
+                const mes = hoy.getMonth() - nacimiento.getMonth();
+                if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+                    edad--;
+                }
+                return edad;
+            }
+            
+            function verificarEdad() {
+                const edad = calcularEdad(fechaNacimiento.value);
+                if (edad !== null && edad < 18) {
+                    tutorSection.style.display = 'block';
+                    nombreTutor.required = true;
+                } else {
+                    tutorSection.style.display = 'none';
+                    nombreTutor.required = false;
+                    nombreTutor.value = '';
+                }
+            }
+            
+            fechaNacimiento.addEventListener('change', verificarEdad);
+            verificarEdad();
+        });
+    </script>
+</body>
+</html>

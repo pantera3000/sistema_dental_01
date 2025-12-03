@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Estadísticas - Consultorio Dental{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .filter-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .kpi-mini {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .kpi-mini:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+    }
+    
+    .kpi-mini-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin: 0.5rem 0;
+    }
+    
+    .kpi-mini-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .chart-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 350px;
+        width: 100%;
+    }
+    
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .chart-title i {
+        color: #667eea;
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="stats-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-2"><i class="bi bi-graph-up-arrow"></i> Estadísticas y Reportes</h2>
+                <p class="mb-0 opacity-75">Análisis detallado del consultorio - Año {{ año_seleccionado }}</p>
+            </div>
+            <a href="{% url 'dashboard:index' %}" class="btn btn-light">
+                <i class="bi bi-arrow-left"></i> Volver al Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="año" class="form-label fw-bold">
+                    <i class="bi bi-calendar3"></i> Seleccionar Año
+                </label>
+                <select name="año" id="año" class="form-select form-select-lg" onchange="this.form.submit()">
+                    {% for año in años_disponibles %}
+                        <option value="{{ año }}" {% if año == año_seleccionado %}selected{% endif %}>
+                            {{ año }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-8 text-end">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- KPIs Resumen -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="kpi-mini">
+                <div class="kpi-mini-label"><i class="bi bi-cash-stack"></i> Ingresos Totales</div>
+                <div class="kpi-mini-value">S/ {{ total_ingresos_año|floatformat:0 }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-mini">
+                <div class="kpi-mini-label"><i class="bi bi-person-plus"></i> Pacientes Nuevos</div>
+                <div class="kpi-mini-value">{{ total_pacientes_nuevos }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-mini">
+                <div class="kpi-mini-label"><i class="bi bi-arrow-repeat"></i> Pacientes Recurrentes</div>
+                <div class="kpi-mini-value">{{ total_pacientes_recurrentes }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-mini">
+                <div class="kpi-mini-label"><i class="bi bi-clipboard-pulse"></i> Total Tratamientos</div>
+                <div class="kpi-mini-value">{{ total_tratamientos }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Principales -->
+    <div class="row">
+        <!-- Gráfico 1: Ingresos Mensuales -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-bar-chart-fill"></i> Ingresos Mensuales {{ año_seleccionado }}
+                </h5>
+                <div class="chart-container">
+                    <canvas id="chartIngresos"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Tratamientos Más Comunes -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-list-check"></i> Top 10 Tratamientos Más Comunes
+                </h5>
+                <div class="chart-container">
+                    <canvas id="chartTratamientos"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Gráfico 3: Pacientes Nuevos vs Recurrentes -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-people-fill"></i> Pacientes Nuevos vs Recurrentes
+                </h5>
+                <div class="chart-container">
+                    <canvas id="chartPacientes"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico 4: Tasa de Completación -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-check-circle-fill"></i> Tasa de Completación de Tratamientos
+                </h5>
+                <div class="chart-container">
+                    <canvas id="chartCompletacion"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Configuración global de Chart.js
+Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+Chart.defaults.color = '#666';
+
+// ============ GRÁFICO 1: Ingresos Mensuales ============
+const ctxIngresos = document.getElementById('chartIngresos').getContext('2d');
+new Chart(ctxIngresos, {
+    type: 'bar',
+    data: {
+        labels: {{ meses_labels|safe }},
+        datasets: [{
+            label: 'Ingresos (S/)',
+            data: {{ ingresos_mensuales|safe }},
+            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+            borderColor: 'rgba(102, 126, 234, 1)',
+            borderWidth: 2,
+            borderRadius: 8,
+            hoverBackgroundColor: 'rgba(102, 126, 234, 1)',
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return 'S/ ' + context.parsed.y.toLocaleString('es-PE', {minimumFractionDigits: 2});
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'S/ ' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// ============ GRÁFICO 2: Tratamientos Más Comunes ============
+const ctxTratamientos = document.getElementById('chartTratamientos').getContext('2d');
+new Chart(ctxTratamientos, {
+    type: 'bar',
+    data: {
+        labels: {{ tratamientos_labels|safe }},
+        datasets: [{
+            label: 'Cantidad',
+            data: {{ tratamientos_data|safe }},
+            backgroundColor: [
+                'rgba(56, 239, 125, 0.8)',
+                'rgba(79, 172, 254, 0.8)',
+                'rgba(245, 87, 108, 0.8)',
+                'rgba(250, 112, 154, 0.8)',
+                'rgba(240, 147, 251, 0.8)',
+                'rgba(48, 207, 208, 0.8)',
+                'rgba(254, 215, 102, 0.8)',
+                'rgba(150, 150, 150, 0.8)',
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(118, 75, 162, 0.8)'
+            ],
+            borderRadius: 6,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// ============ GRÁFICO 3: Pacientes Nuevos vs Recurrentes ============
+const ctxPacientes = document.getElementById('chartPacientes').getContext('2d');
+new Chart(ctxPacientes, {
+    type: 'bar',
+    data: {
+        labels: {{ meses_labels|safe }},
+        datasets: [
+            {
+                label: 'Nuevos',
+                data: {{ pacientes_nuevos_mes|safe }},
+                backgroundColor: 'rgba(56, 239, 125, 0.8)',
+                borderColor: 'rgba(56, 239, 125, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+            },
+            {
+                label: 'Recurrentes',
+                data: {{ pacientes_recurrentes_mes|safe }},
+                backgroundColor: 'rgba(79, 172, 254, 0.8)',
+                borderColor: 'rgba(79, 172, 254, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        },
+        scales: {
+            x: {
+                stacked: true,
+            },
+            y: {
+                stacked: true,
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// ============ GRÁFICO 4: Tasa de Completación ============
+const ctxCompletacion = document.getElementById('chartCompletacion').getContext('2d');
+new Chart(ctxCompletacion, {
+    type: 'doughnut',
+    data: {
+        labels: ['Completados', 'En Progreso', 'Pendientes'{% if cancelados > 0 %}, 'Cancelados'{% endif %}],
+        datasets: [{
+            data: [
+                {{ completados }},
+                {{ en_progreso }},
+                {{ pendientes }}
+                {% if cancelados > 0 %}, {{ cancelados }}{% endif %}
+            ],
+            backgroundColor: [
+                'rgba(56, 239, 125, 0.8)',
+                'rgba(245, 87, 108, 0.8)',
+                'rgba(150, 150, 150, 0.8)'
+                {% if cancelados > 0 %}, 'rgba(220, 53, 69, 0.8)'{% endif %}
+            ],
+            borderWidth: 0,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed || 0;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return label + ': ' + value + ' (' + percentage + '%)';
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

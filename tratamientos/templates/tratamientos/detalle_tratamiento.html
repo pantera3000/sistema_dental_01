@@ -1,0 +1,317 @@
+﻿<!-- tratamientos/templates/tratamientos/detalle_tratamiento.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load l10n %}
+
+{% block title %}Tratamiento - {{ tratamiento.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+        --success-gradient: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        --hover-transform: translateY(-2px);
+    }
+
+    .detail-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+
+    .detail-card:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge-gradient {
+        background: var(--primary-gradient);
+        border: none;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+    }
+
+    .info-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: none;
+        border-radius: 1rem;
+        padding: 1.5rem;
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: all 0.2s ease;
+    }
+
+    .stat-box:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+        margin-right: 0.75rem;
+    }
+
+    .progress-custom {
+        height: 16px;
+        border-radius: 50px;
+        background-color: #e9ecef;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar-custom {
+        background: var(--success-gradient);
+        border-radius: 50px;
+        transition: width 0.6s ease;
+        height: 100%;
+        display: block;
+    }
+
+    .table-payments {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .table-payments thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        padding: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .table-payments tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .table-payments tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table-payments tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .action-btn-detail {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .action-btn-detail:hover {
+        transform: var(--hover-transform);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-register-payment {
+        background: var(--success-gradient);
+        border: none;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-register-payment:hover {
+        transform: var(--hover-transform);
+        box-shadow: 0 6px 16px rgba(25, 135, 84, 0.4);
+    }
+
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 1rem;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center">
+    <div class="col-lg-8">
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h2 class="fw-bold mb-3"> {{ tratamiento.nombre }}</h2>
+                <div class="d-flex gap-2">
+                    <span class="badge badge-gradient rounded-pill shadow-sm">
+                        {% if tratamiento.estado_pago == 'completado' %} Pagado
+                        {% elif tratamiento.estado_pago == 'parcial' %} Pago Parcial
+                        {% else %} Sin Pago{% endif %}
+                    </span>
+                    <span class="badge bg-{{ tratamiento.clase_estado }} rounded-pill">
+                        {{ tratamiento.get_estado_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'tratamientos:editar' tratamiento.pk %}" class="btn btn-warning rounded-pill px-4 shadow-sm"><i class="bi bi-pencil me-2"></i>Editar</a>
+                
+                <!-- Botón: volver a lista de tratamientos -->
+                {% if request.META.HTTP_REFERER and 'tratamientos' in request.META.HTTP_REFERER and 'pacientes' not in request.META.HTTP_REFERER %}
+                    <a href="{% url 'tratamientos:lista' %}" class="btn btn-secondary btn-sm"> Lista de Tratamientos</a>
+                {% else %}
+                    <!-- Botón: volver al paciente -->
+                    <a href="{% url 'pacientes:detalle' tratamiento.paciente.pk %}?tratamientos_page=1" class="btn btn-secondary btn-sm"> Paciente</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Información del paciente -->
+        <div class="alert alert-info mb-4 shadow-sm border-0 rounded-3">
+            <i class="bi bi-person-circle me-2"></i>
+            <strong>Paciente:</strong> {{ tratamiento.paciente.nombre_completo }} <span class="text-muted">(DNI: {{ tratamiento.paciente.dni }})</span>
+        </div>
+
+        <!-- Tarjeta principal -->
+        <div class="detail-card p-4 mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Resumen Financiero</h5>
+                    <div class="stat-box">
+                        <div class="d-flex align-items-center">
+                            <span class="stat-icon"></span>
+                            <div>
+                                <small class="text-muted d-block">Costo Total</small>
+                                <strong class="fs-5">S/ {{ tratamiento.costo_total }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="d-flex align-items-center">
+                            <span class="stat-icon"></span>
+                            <div>
+                                <small class="text-muted d-block">Total Pagado</small>
+                                <strong class="fs-5 text-success">S/ {{ tratamiento.total_pagado }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="d-flex align-items-center">
+                            <span class="stat-icon"></span>
+                            <div>
+                                <small class="text-muted d-block">Deuda Pendiente</small>
+                                <strong class="fs-5 text-danger">S/ {{ tratamiento.deuda }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="fw-bold text-muted">Progreso de Pago</small>
+                            <small class="fw-bold text-success">{{ tratamiento.porcentaje_pagado|floatformat:1 }}%</small>
+                        </div>
+                        <div class="progress-custom">
+                            <div class="progress-bar-custom" role="progressbar" 
+                                style="width: {{ tratamiento.porcentaje_pagado|unlocalize }}%;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-calendar-check me-2 text-primary"></i>Información del Tratamiento</h5>
+                    <div class="info-card">
+                        <p class="mb-2"><i class="bi bi-calendar-event me-2"></i><strong>Inicio:</strong> {{ tratamiento.fecha_inicio|date:"d/m/Y" }}</p>
+                        {% if tratamiento.fecha_fin %}
+                        <p class="mb-2"><i class="bi bi-calendar-check me-2"></i><strong>Finalización:</strong> {{ tratamiento.fecha_fin|date:"d/m/Y" }}</p>
+                        {% endif %}
+                        {% if tratamiento.descripcion %}
+                        <p class="mb-1 mt-3"><i class="bi bi-file-text me-2"></i><strong>Descripción:</strong></p>
+                        <p class="text-muted mb-0">{{ tratamiento.descripcion }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón para nuevo pago -->
+        <div class="d-flex justify-content-end mb-4">
+            <a href="{% url 'tratamientos:crear_pago' tratamiento.pk %}" class="btn btn-register-payment text-white">
+                <i class="bi bi-plus-circle me-2"></i>Registrar Pago
+            </a>
+        </div>
+
+        <!-- Historial de pagos -->
+        <h4 class="fw-bold mb-4"><i class="bi bi-receipt me-2 text-primary"></i>Historial de Pagos</h4>
+        {% if tratamiento.pagos.exists %}
+            <div class="detail-card p-0">
+                <div class="table-responsive">
+                    <table class="table table-payments mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha del pago</th>
+                                <th>Registrado en</th>
+                                <th>Monto</th>
+                                <th>Método</th>
+                                <th>Nota</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pago in tratamiento.pagos.all %}
+                            <tr>
+                                <td>{{ pago.fecha_pago|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <small class="text-muted">{{ pago.registrado_en|date:"d/m/Y H:i" }}</small>
+                                </td>
+                                <td><strong>S/ {{ pago.monto }}</strong></td>
+                                <td>{{ pago.get_metodo_pago_display }}</td>
+                                <td>{{ pago.nota|default:"" }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'tratamientos:eliminar_pago' pago.pk %}" 
+                                    class="action-btn-detail btn-outline-danger" 
+                                    onclick="return confirm('¿Eliminar este pago?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon"></div>
+                <h5 class="text-muted mb-2">No hay pagos registrados</h5>
+                <p class="text-muted small">Aún no se han registrado pagos para este tratamiento.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Set progress bar width dynamically
+    document.addEventListener('DOMContentLoaded', function() {
+        var progressBar = document.querySelector('.progress-bar-custom');
+        if (progressBar) {
+            var percentage = {{ tratamiento.porcentaje_pagado|default:0 }};
+            progressBar.style.width = percentage + '%';
+            console.log('Progress bar set to: ' + percentage + '%');
+        }
+    });
+</script>
+{% endblock %}

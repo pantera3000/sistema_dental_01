@@ -1,0 +1,612 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Odontograma - {{ paciente.nombre_completo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" id="odontograma-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Odontograma</h1>
+            <p class="text-muted mb-0">Paciente: <strong>{{ paciente.nombre_completo }}</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <button id="export-pdf-btn" class="btn btn-success">
+                <i class="bi bi-file-pdf"></i> Exportar PDF
+            </button>
+            <a href="{% url 'pacientes:detalle' paciente.pk %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Columna Izquierda: Herramientas -->
+        <div class="col-md-3">
+            <!-- Selector de Dentición -->
+            <div class="card shadow mb-3">
+                <div class="card-header py-3 bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">🦷 Tipo de Dentición</h6>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="denticion" id="denticion-adulto" value="adulto" checked>
+                        <label class="btn btn-outline-primary" for="denticion-adulto">Adulto (32)</label>
+                        
+                        <input type="radio" class="btn-check" name="denticion" id="denticion-nino" value="nino">
+                        <label class="btn btn-outline-primary" for="denticion-nino">Niño (20)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estados Dentales Básicos -->
+            <div class="card shadow mb-3">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">🛠️ Estados Básicos</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group list-group-flush" id="tools-container">
+                        <button type="button" class="list-group-item list-group-item-action active py-2" data-estado="sano" data-color="#ffffff">
+                            <span class="color-box" style="background: #ffffff; border: 1px solid #ccc;"></span> Sano / Borrar
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="caries" data-color="#dc3545">
+                            <span class="color-box" style="background: #dc3545;"></span> Caries
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="obturado" data-color="#0d6efd">
+                            <span class="color-box" style="background: #0d6efd;"></span> Obturado
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="corona" data-color="#ffc107">
+                            <span class="color-box" style="background: #ffc107;"></span> Corona
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="ausente" data-color="#212529">
+                            <span class="color-box" style="background: #212529;"></span> Ausente
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="endodoncia" data-color="#6f42c1">
+                            <span class="color-box" style="background: #6f42c1;"></span> Endodoncia
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="sellante" data-color="#20c997">
+                            <span class="color-box" style="background: #20c997;"></span> Sellante
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ortodoncia -->
+            <div class="card shadow mb-3">
+                <div class="card-header py-3 bg-info text-white">
+                    <h6 class="m-0 font-weight-bold">🦷 Ortodoncia</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group list-group-flush" id="ortho-tools">
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="bracket" data-color="#17a2b8">
+                            <span class="color-box" style="background: #17a2b8;"></span> Bracket
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="retenedor" data-color="#fd7e14">
+                            <span class="color-box" style="background: #fd7e14;"></span> Retenedor
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="aparato" data-color="#e83e8c">
+                            <span class="color-box" style="background: #e83e8c;"></span> Aparato Removible
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="extraccion_programada" data-color="#6c757d">
+                            <span class="color-box" style="background: #6c757d;"></span> Extracción Programada
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estados Adicionales -->
+            <div class="card shadow mb-3">
+                <div class="card-header py-3 bg-warning">
+                    <h6 class="m-0 font-weight-bold">⚕️ Estados Adicionales</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group list-group-flush" id="additional-tools">
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="fractura" data-color="#ff6b6b">
+                            <span class="color-box" style="background: #ff6b6b;"></span> Fractura
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="implante" data-color="#4ecdc4">
+                            <span class="color-box" style="background: #4ecdc4;"></span> Implante
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="puente" data-color="#95a5a6">
+                            <span class="color-box" style="background: #95a5a6;"></span> Puente
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="protesis_parcial" data-color="#9b59b6">
+                            <span class="color-box" style="background: #9b59b6;"></span> Prótesis Parcial
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="protesis_total" data-color="#8e44ad">
+                            <span class="color-box" style="background: #8e44ad;"></span> Prótesis Total
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="en_erupcion" data-color="#f39c12">
+                            <span class="color-box" style="background: #f39c12;"></span> En Erupción
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action py-2" data-estado="retenido" data-color="#d35400">
+                            <span class="color-box" style="background: #d35400;"></span> Diente Retenido
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info small">
+                <strong>💡 Instrucciones:</strong><br>
+                • <strong>Hover:</strong> Ver historial<br>
+                • <strong>Click izquierdo:</strong> Aplicar estado<br>
+                • <strong>Click derecho:</strong> Observaciones<br>
+                • <strong>Borde rojo:</strong> Tiene observaciones
+            </div>
+        </div>
+
+        <!-- Columna Central: Odontograma -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-body text-center bg-light" style="overflow-x: auto;">
+                    <svg id="odontograma-svg" width="900" height="400" viewBox="0 0 900 400" style="background-color: #f8f9fa;">
+                        <g id="teeth-container"></g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Historial -->
+        <div class="col-md-3">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-success text-white">
+                    <h6 class="m-0 font-weight-bold">📋 Historial de Cambios</h6>
+                </div>
+                <div class="card-body p-2" style="max-height: 600px; overflow-y: auto;">
+                    <div id="history-container">
+                        <p class="text-muted text-center small">Los cambios aparecerán aquí...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tooltip personalizado -->
+<div id="tooth-tooltip" class="tooth-tooltip"></div>
+
+<!-- Modal para Observaciones -->
+<div class="modal fade" id="observacionesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Observaciones - Diente <span id="modal-diente-num"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cara:</strong> <span id="modal-cara-nombre"></span></label>
+                </div>
+                <div class="mb-3">
+                    <label for="observaciones-text" class="form-label">Observaciones:</label>
+                    <textarea class="form-control" id="observaciones-text" rows="4" placeholder="Escribe observaciones sobre este diente..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="guardar-observaciones">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tooth-surface {
+        cursor: pointer;
+        transition: fill 0.2s;
+    }
+    .tooth-surface:hover {
+        opacity: 0.8;
+        stroke-width: 2;
+    }
+    .tooth-label {
+        font-size: 12px;
+        font-weight: bold;
+        fill: #555;
+        text-anchor: middle;
+    }
+    .tooth-with-obs {
+        stroke: #ff6b6b !important;
+        stroke-width: 3 !important;
+    }
+    .color-box {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        margin-right: 8px;
+        vertical-align: middle;
+        border: 1px solid #dee2e6;
+    }
+    .history-item {
+        border-left: 3px solid #0d6efd;
+        padding-left: 10px;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+    }
+    .history-item .time {
+        color: #6c757d;
+        font-size: 0.75rem;
+    }
+    
+    /* Tooltip personalizado */
+    .tooth-tooltip {
+        position: fixed;
+        background: white;
+        border: 2px solid #0d6efd;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 10000;
+        max-width: 300px;
+        font-size: 0.85rem;
+        display: none;
+        pointer-events: none;
+    }
+    .tooth-tooltip.show {
+        display: block;
+    }
+    .tooth-tooltip .tooltip-header {
+        font-weight: bold;
+        color: #0d6efd;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 4px;
+    }
+    .tooth-tooltip .tooltip-item {
+        margin: 4px 0;
+        padding: 4px 0;
+        border-bottom: 1px dashed #f0f0f0;
+    }
+    .tooth-tooltip .tooltip-item:last-child {
+        border-bottom: none;
+    }
+    .tooltip-obs {
+        font-style: italic;
+        color: #6c757d;
+        font-size: 0.8rem;
+        margin-top: 4px;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const svgContainer = document.getElementById('teeth-container');
+        const historyContainer = document.getElementById('history-container');
+        const tooltip = document.getElementById('tooth-tooltip');
+        const allTools = [
+            ...document.querySelectorAll('#tools-container button'),
+            ...document.querySelectorAll('#ortho-tools button'),
+            ...document.querySelectorAll('#additional-tools button')
+        ];
+        
+        let currentTool = 'sano';
+        let currentColor = '#ffffff';
+        let currentDenticion = 'adulto';
+        let currentObservaciones = {};
+        let historyLog = [];
+        let toothStates = {};
+
+        const teethAdulto = {
+            upper: [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28],
+            lower: [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]
+        };
+        
+        const teethNino = {
+            upper: [55, 54, 53, 52, 51, 61, 62, 63, 64, 65],
+            lower: [85, 84, 83, 82, 81, 71, 72, 73, 74, 75]
+        };
+
+        const estadoNombres = {
+            'sano': 'Sano', 'caries': 'Caries', 'obturado': 'Obturado', 'corona': 'Corona',
+            'ausente': 'Ausente', 'endodoncia': 'Endodoncia', 'sellante': 'Sellante',
+            'bracket': 'Bracket', 'retenedor': 'Retenedor', 'aparato': 'Aparato Removible',
+            'extraccion_programada': 'Extracción Programada', 'fractura': 'Fractura',
+            'implante': 'Implante', 'puente': 'Puente', 'protesis_parcial': 'Prótesis Parcial',
+            'protesis_total': 'Prótesis Total', 'en_erupcion': 'En Erupción', 'retenido': 'Diente Retenido'
+        };
+
+        const caraNombres = {
+            'V': 'Vestibular', 'L': 'Lingual', 'M': 'Mesial', 'D': 'Distal', 'O': 'Oclusal'
+        };
+
+        // Selector de dentición
+        document.querySelectorAll('input[name="denticion"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                currentDenticion = this.value;
+                renderTeeth();
+                loadStates();
+            });
+        });
+
+        // Renderizar dientes
+        function renderTeeth() {
+            svgContainer.innerHTML = '';
+            const teeth = currentDenticion === 'adulto' ? teethAdulto : teethNino;
+            let xStart = 50, yUpper = 50, yLower = 250;
+            let gap = currentDenticion === 'adulto' ? 50 : 80;
+
+            teeth.upper.forEach((toothId, index) => {
+                let x = xStart + (index * gap);
+                if (currentDenticion === 'adulto' && index >= 8) x += 20;
+                if (currentDenticion === 'nino' && index >= 5) x += 20;
+                createTooth(toothId, x, yUpper, 'upper');
+            });
+
+            teeth.lower.forEach((toothId, index) => {
+                let x = xStart + (index * gap);
+                if (currentDenticion === 'adulto' && index >= 8) x += 20;
+                if (currentDenticion === 'nino' && index >= 5) x += 20;
+                createTooth(toothId, x, yLower, 'lower');
+            });
+        }
+
+        function createTooth(id, x, y, type) {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.setAttribute("transform", `translate(${x}, ${y})`);
+            group.setAttribute("data-tooth", id);
+
+            const getCaraLogica = (facePos) => {
+                if (facePos === 'center') return 'O';
+                if (type === 'upper') {
+                    if (facePos === 'top') return 'V';
+                    if (facePos === 'bottom') return 'L';
+                } else {
+                    if (facePos === 'top') return 'L';
+                    if (facePos === 'bottom') return 'V';
+                }
+                const isRightSide = (id >= 11 && id <= 18) || (id >= 41 && id <= 48) || (id >= 51 && id <= 55) || (id >= 81 && id <= 85);
+                if (isRightSide) {
+                    if (facePos === 'left') return 'D';
+                    if (facePos === 'right') return 'M';
+                } else {
+                    if (facePos === 'left') return 'M';
+                    if (facePos === 'right') return 'D';
+                }
+                return 'X';
+            };
+
+            const polyData = [
+                { points: "0,0 40,0 30,10 10,10", pos: 'top' },
+                { points: "40,0 40,40 30,30 30,10", pos: 'right' },
+                { points: "40,40 0,40 10,30 30,30", pos: 'bottom' },
+                { points: "0,40 0,0 10,10 10,30", pos: 'left' },
+                { points: "10,10 30,10 30,30 10,30", pos: 'center' }
+            ];
+
+            polyData.forEach(p => {
+                const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                poly.setAttribute("points", p.points);
+                poly.setAttribute("class", "tooth-surface");
+                poly.setAttribute("fill", "white");
+                poly.setAttribute("stroke", "#ccc");
+                poly.setAttribute("stroke-width", "1");
+                
+                const caraLogica = getCaraLogica(p.pos);
+                poly.setAttribute("data-cara", caraLogica);
+                poly.setAttribute("data-diente", id);
+                
+                poly.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    applyTool(poly, id, caraLogica);
+                });
+
+                poly.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    openObservacionesModal(id, caraLogica);
+                });
+
+                poly.addEventListener('mouseenter', (e) => showTooltip(e, id, caraLogica));
+                poly.addEventListener('mouseleave', hideTooltip);
+
+                group.appendChild(poly);
+            });
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", "20");
+            text.setAttribute("y", type === 'upper' ? "-5" : "55");
+            text.setAttribute("class", "tooth-label");
+            text.textContent = id;
+            group.appendChild(text);
+
+            svgContainer.appendChild(group);
+        }
+
+        // Tooltip
+        function showTooltip(e, diente, cara) {
+            const key = `${diente}-${cara}`;
+            const state = toothStates[key];
+            
+            if (!state || state.estado === 'sano') {
+                hideTooltip();
+                return;
+            }
+
+            let html = `<div class="tooltip-header">Diente ${diente} - ${caraNombres[cara]}</div>`;
+            html += `<div class="tooltip-item"><strong>Estado:</strong> ${estadoNombres[state.estado]}</div>`;
+            
+            if (state.observaciones) {
+                html += `<div class="tooltip-obs">💬 ${state.observaciones}</div>`;
+            }
+
+            tooltip.innerHTML = html;
+            tooltip.classList.add('show');
+            tooltip.style.left = (e.pageX + 15) + 'px';
+            tooltip.style.top = (e.pageY + 15) + 'px';
+        }
+
+        function hideTooltip() {
+            tooltip.classList.remove('show');
+        }
+
+        // Selección de herramienta
+        allTools.forEach(btn => {
+            btn.addEventListener('click', function() {
+                allTools.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTool = this.dataset.estado;
+                currentColor = this.dataset.color;
+            });
+        });
+
+        function applyTool(element, diente, cara) {
+            element.setAttribute("fill", currentColor);
+            const key = `${diente}-${cara}`;
+            toothStates[key] = { estado: currentTool, observaciones: currentObservaciones[key] || '' };
+            saveState(diente, cara, currentTool);
+            // No agregamos al historial aquí, se cargará desde la BD
+            loadHistory();
+        }
+
+        function renderHistory() {
+            if (historyLog.length === 0) {
+                historyContainer.innerHTML = '<p class="text-muted text-center small">Los cambios aparecerán aquí...</p>';
+                return;
+            }
+            
+            let html = '';
+            historyLog.forEach(entry => {
+                const obsText = entry.observaciones ? `<div class="text-muted small mt-1"><i class="bi bi-chat-left-text"></i> ${entry.observaciones}</div>` : '';
+                html += `
+                    <div class="history-item">
+                        <div class="time">${entry.time}</div>
+                        <div><strong>Diente ${entry.diente}</strong> - ${entry.cara}</div>
+                        <div class="text-primary">${entry.estado}</div>
+                        ${obsText}
+                    </div>
+                `;
+            });
+            historyContainer.innerHTML = html;
+        }
+
+        // Modal de observaciones
+        let currentModalDiente = null;
+        let currentModalCara = null;
+
+        function openObservacionesModal(diente, cara) {
+            currentModalDiente = diente;
+            currentModalCara = cara;
+            
+            document.getElementById('modal-diente-num').textContent = diente;
+            document.getElementById('modal-cara-nombre').textContent = caraNombres[cara] || cara;
+            
+            const key = `${diente}-${cara}`;
+            document.getElementById('observaciones-text').value = currentObservaciones[key] || '';
+            
+            new bootstrap.Modal(document.getElementById('observacionesModal')).show();
+        }
+
+        document.getElementById('guardar-observaciones').addEventListener('click', function() {
+            const obs = document.getElementById('observaciones-text').value;
+            const key = `${currentModalDiente}-${currentModalCara}`;
+            currentObservaciones[key] = obs;
+            
+            if (toothStates[key]) {
+                toothStates[key].observaciones = obs;
+            }
+            
+            saveObservaciones(currentModalDiente, currentModalCara, obs);
+            
+            const poly = document.querySelector(`polygon[data-diente="${currentModalDiente}"][data-cara="${currentModalCara}"]`);
+            if (poly) {
+                if (obs.trim()) {
+                    poly.classList.add('tooth-with-obs');
+                } else {
+                    poly.classList.remove('tooth-with-obs');
+                }
+            }
+            
+            bootstrap.Modal.getInstance(document.getElementById('observacionesModal')).hide();
+            loadHistory();
+        });
+
+        // API Calls
+        function saveState(diente, cara, estado) {
+            fetch("{% url 'tratamientos:api_guardar_odontograma' paciente.pk %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ diente, cara, estado })
+            }).catch(err => console.error(err));
+        }
+
+        function saveObservaciones(diente, cara, observaciones) {
+            fetch("{% url 'tratamientos:api_guardar_odontograma' paciente.pk %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ diente, cara, estado: currentTool, observaciones })
+            }).catch(err => console.error(err));
+        }
+
+        function loadStates() {
+            fetch("{% url 'tratamientos:api_odontograma' paciente.pk %}")
+            .then(response => response.json())
+            .then(data => {
+                data.estados.forEach(item => {
+                    const key = `${item.diente}-${item.cara}`;
+                    toothStates[key] = { estado: item.estado, observaciones: item.observaciones || '' };
+                    
+                    const poly = document.querySelector(`polygon[data-diente="${item.diente}"][data-cara="${item.cara}"]`);
+                    if (poly) {
+                        const toolBtn = document.querySelector(`button[data-estado="${item.estado}"]`);
+                        if (toolBtn) poly.setAttribute("fill", toolBtn.dataset.color);
+                        
+                        if (item.observaciones) {
+                            currentObservaciones[key] = item.observaciones;
+                            poly.classList.add('tooth-with-obs');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Cargar historial persistente
+        function loadHistory() {
+            fetch("{% url 'tratamientos:api_historial_odontograma' paciente.pk %}")
+            .then(response => response.json())
+            .then(data => {
+                historyLog = [];
+                data.historial.forEach(entry => {
+                    const fecha = new Date(entry.fecha);
+                    const timeStr = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                    const dateStr = fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+                    
+                    historyLog.push({
+                        time: `${dateStr} ${timeStr}`,
+                        diente: entry.diente,
+                        cara: caraNombres[entry.cara] || entry.cara,
+                        estado: estadoNombres[entry.estado] || entry.estado,
+                        observaciones: entry.observaciones
+                    });
+                });
+                renderHistory();
+            })
+            .catch(err => console.error('Error cargando historial:', err));
+        }
+
+        // Exportar PDF
+        document.getElementById('export-pdf-btn').addEventListener('click', function() {
+            const element = document.getElementById('odontograma-container');
+            const opt = {
+                margin: 10,
+                filename: 'odontograma_{{ paciente.nombre_completo }}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
+        });
+
+        // Inicializar
+        renderTeeth();
+        loadStates();
+        loadHistory();
+    });
+</script>
+{% endblock %}

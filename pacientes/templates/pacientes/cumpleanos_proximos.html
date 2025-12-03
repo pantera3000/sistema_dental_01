@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}🎂 Cumpleaños Próximos{% endblock %}
+
+{% block content %}
+<style>
+    /* Header con gradiente festivo */
+    .birthday-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .birthday-header h2 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.75rem;
+    }
+
+    .birthday-header .btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .birthday-header .btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    /* Contenedor de tabla mejorado */
+    .birthday-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    /* Tabla personalizada */
+    .birthday-table {
+        margin-bottom: 0;
+    }
+
+    .birthday-table thead {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .birthday-table thead th {
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        color: #2d3748;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .birthday-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    /* Filas con colores según proximidad */
+    .birthday-table tbody tr.birthday-today {
+        background: linear-gradient(90deg, rgba(72, 187, 120, 0.1) 0%, rgba(72, 187, 120, 0.05) 100%);
+        border-left: 4px solid #48bb78;
+    }
+
+    .birthday-table tbody tr.birthday-week {
+        background: linear-gradient(90deg, rgba(237, 137, 54, 0.08) 0%, rgba(237, 137, 54, 0.03) 100%);
+        border-left: 4px solid #ed8936;
+    }
+
+    .birthday-table tbody tr.birthday-month {
+        background: linear-gradient(90deg, rgba(66, 153, 225, 0.08) 0%, rgba(66, 153, 225, 0.03) 100%);
+        border-left: 4px solid #4299e1;
+    }
+
+    .birthday-table tbody tr.birthday-later {
+        background: white;
+        border-left: 4px solid transparent;
+    }
+
+    .birthday-table tbody tr:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Badge animado para HOY */
+    .badge-today {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        display: inline-block;
+        animation: pulse 2s infinite;
+        box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.6);
+        }
+    }
+
+    /* Badges para días restantes */
+    .days-badge {
+        display: inline-block;
+        padding: 0.3rem 0.7rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .days-today {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+    }
+
+    .days-week {
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        color: white;
+    }
+
+    .days-month {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        color: white;
+    }
+
+    .days-later {
+        background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+        color: white;
+    }
+
+    /* Nombre del paciente */
+    .patient-name {
+        font-weight: 500;
+        color: #2d3748;
+        font-size: 0.95rem;
+    }
+
+    /* Botón de acción mejorado */
+    .btn-view {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-view:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        color: white;
+    }
+
+    /* Mensaje vacío */
+    .empty-message {
+        text-align: center;
+        padding: 3rem;
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    .empty-message::before {
+        content: "🎂";
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="birthday-header d-flex justify-content-between align-items-center">
+    <h2>🎂 Cumpleaños Próximos (próximos 180 días)</h2>
+    <a href="{% url 'pacientes:lista' %}" class="btn btn-sm">← Lista de Pacientes</a>
+</div>
+
+<div class="birthday-container">
+    {% if pacientes %}
+        <div class="table-responsive">
+            <table class="table birthday-table">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>DNI</th>
+                        <th>Edad</th>
+                        <th>Fecha de Cumpleaños</th>
+                        <th>Días Restantes</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paciente in pacientes %}
+                    <tr class="{% if paciente.dias_hasta_cumple == 0 %}birthday-today{% elif paciente.dias_hasta_cumple <= 7 %}birthday-week{% elif paciente.dias_hasta_cumple <= 30 %}birthday-month{% else %}birthday-later{% endif %}">
+                        <td>
+                            {% if paciente.dias_hasta_cumple == 0 %}
+                                <span class="badge-today">¡HOY! 🎉</span>
+                            {% endif %}
+                            <span class="patient-name">{{ paciente.nombre_completo }}</span>
+                        </td>
+                        <td class="text-muted">{{ paciente.dni }}</td>
+                        <td><strong>{{ paciente.edad }}</strong> años</td>
+                        <td>{{ paciente.fecha_nacimiento|date:"d \d\e F" }}</td>
+                        <td>
+                            {% if paciente.dias_hasta_cumple == 0 %}
+                                <span class="days-badge days-today">Hoy 🎂</span>
+                            {% elif paciente.dias_hasta_cumple <= 7 %}
+                                <span class="days-badge days-week">{{ paciente.dias_hasta_cumple }} día{{ paciente.dias_hasta_cumple|pluralize }}</span>
+                            {% elif paciente.dias_hasta_cumple <= 30 %}
+                                <span class="days-badge days-month">{{ paciente.dias_hasta_cumple }} día{{ paciente.dias_hasta_cumple|pluralize }}</span>
+                            {% else %}
+                                <span class="days-badge days-later">{{ paciente.dias_hasta_cumple }} día{{ paciente.dias_hasta_cumple|pluralize }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'pacientes:detalle' paciente.pk %}" class="btn btn-sm btn-view">👁️ Ver Perfil</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-message">
+            No hay cumpleaños en los próximos 180 días.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

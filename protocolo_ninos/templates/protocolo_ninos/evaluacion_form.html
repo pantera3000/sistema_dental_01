@@ -1,0 +1,635 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Evaluación Funcional - {{ paciente.nombre_completo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1 text-gray-800">Evaluación Funcional y Respiratoria</h1>
+                    <p class="text-muted mb-0">Paciente: <strong>{{ paciente.nombre_completo }}</strong></p>
+                </div>
+                <a href="{% url 'pacientes:detalle' paciente.id %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver al Paciente
+                </a>
+            </div>
+
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <!-- Ventana Nasal -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-primary text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-lungs me-2"></i>Ventana Nasal</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Más cerrada</label>
+                                <div class="d-flex gap-3">
+                                    {% for radio in form.ventana_nasal_mas_cerrada %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Respira mejor</label>
+                                <div class="d-flex gap-3">
+                                    {% for radio in form.ventana_nasal_respira_mejor %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sellado Labial y Cara -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-info text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-emoji-smile me-2"></i>Sellado Labial y Cara</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    {{ form.sellado_labial_reposo }}
+                                    <label class="form-check-label fw-bold" for="{{ form.sellado_labial_reposo.id_for_label }}">Sellado labial en reposo</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    {{ form.fascies_adenoidea }}
+                                    <label class="form-check-label fw-bold" for="{{ form.fascies_adenoidea.id_for_label }}">Fascies adenoidea (ojeras)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    {{ form.labios_cortados }}
+                                    <label class="form-check-label fw-bold" for="{{ form.labios_cortados.id_for_label }}">Labios cortados</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patrón de Crecimiento y Oclusión -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-success text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-rulers me-2"></i>Patrón de Crecimiento y Oclusión</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Patrón de crecimiento</label>
+                                {% for radio in form.patron_crecimiento %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Maloclusión</label>
+                                {% for radio in form.maloclusion %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Mordida Cruzada</label>
+                                {% for radio in form.mordida_cruzada %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.mordida_abierta }}
+                                    <label class="form-check-label fw-bold" for="{{ form.mordida_abierta.id_for_label }}">Mordida Abierta</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Sobremordida</label>
+                                <div class="d-flex gap-3">
+                                    {% for radio in form.sobremordida %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amígdalas -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-danger text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-virus me-2"></i>Amígdalas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Grado</label>
+                                <div class="d-flex gap-3">
+                                    {% for radio in form.amigdalas_grado %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Más inflamada</label>
+                                <div class="d-flex gap-3">
+                                    {% for radio in form.amigdalas_mas_inflamada %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Capacidad Masticatoria -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-warning text-dark py-3">
+                        <h5 class="m-0"><i class="bi bi-egg-fried me-2"></i>Capacidad Masticatoria</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Masticador</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        {{ form.masticador_derecho }}
+                                        <label class="form-check-label" for="{{ form.masticador_derecho.id_for_label }}">Derecho</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.masticador_izquierdo }}
+                                        <label class="form-check-label" for="{{ form.masticador_izquierdo.id_for_label }}">Izquierdo</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Preferencias</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <div class="form-check">
+                                        {{ form.prefiere_yogurt }}
+                                        <label class="form-check-label" for="{{ form.prefiere_yogurt.id_for_label }}">Yogurt</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.prefiere_manzana }}
+                                        <label class="form-check-label" for="{{ form.prefiere_manzana.id_for_label }}">Manzana</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.prefiere_naranja }}
+                                        <label class="form-check-label" for="{{ form.prefiere_naranja.id_for_label }}">Naranja</label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.prefiere_zumo }}
+                                        <label class="form-check-label" for="{{ form.prefiere_zumo.id_for_label }}">Zumo</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    {{ form.corta_bocados }}
+                                    <label class="form-check-label fw-bold" for="{{ form.corta_bocados.id_for_label }}">¿Corta a bocados?</label>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold">¿Cuánto tarda en comer?</label>
+                                <div class="d-flex gap-3">
+                                    {% for radio in form.tiempo_comer %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    {{ form.aguanta_5min_labios_sellados }}
+                                    <label class="form-check-label" for="{{ form.aguanta_5min_labios_sellados.id_for_label }}">¿Aguanta 5 min con labios sellados?</label>
+                                </div>
+                                <div class="form-check form-switch mt-2">
+                                    {{ form.dia_mantiene_sellado }}
+                                    <label class="form-check-label" for="{{ form.dia_mantiene_sellado.id_for_label }}">¿Durante el día mantiene el sellado labial?</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    {{ form.durmiendo_mantiene_sellado }}
+                                    <label class="form-check-label" for="{{ form.durmiendo_mantiene_sellado.id_for_label }}">¿Durmiendo mantiene el sellado labial?</label>
+                                </div>
+                                <div class="form-check form-switch mt-2">
+                                    {{ form.es_respirador_oral }}
+                                    <label class="form-check-label fw-bold text-danger" for="{{ form.es_respirador_oral.id_for_label }}">¿Es respirador oral?</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Capacidad Respiratoria -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-secondary text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-wind me-2"></i>Capacidad Respiratoria y Deglución</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Deglución</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            {{ form.deglucion_traga_normalidad }}
+                                            <label class="form-check-label" for="{{ form.deglucion_traga_normalidad.id_for_label }}">Traga con normalidad</label>
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.deglucion_traga_dificultad }}
+                                            <label class="form-check-label" for="{{ form.deglucion_traga_dificultad.id_for_label }}">Traga con dificultad</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            {{ form.deglucion_lengua_dientes }}
+                                            <label class="form-check-label" for="{{ form.deglucion_lengua_dientes.id_for_label }}">Mete la lengua entre los dientes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.deglucion_lengua_marcas }}
+                                            <label class="form-check-label" for="{{ form.deglucion_lengua_marcas.id_for_label }}">Lengua con marcas en los bordes</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Lengua con boca abierta</label>
+                                {% for radio in form.lengua_boca_abierta %}
+                                <div class="form-check mb-2">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alergias e Historial -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-danger text-white py-3" style="background: linear-gradient(45deg, #ff9966, #ff5e62);">
+                        <h5 class="m-0"><i class="bi bi-activity me-2"></i>Alergias e Historial</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    {{ form.es_alergico }}
+                                    <label class="form-check-label fw-bold" for="{{ form.es_alergico.id_for_label }}">¿Es alérgico?</label>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                {{ form.alergico_a_que.label_tag }}
+                                {{ form.alergico_a_que }}
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Resfríos último año</label>
+                                {% for radio in form.resfrios_ultimo_anio %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Enfermedades respiratorias</label>
+                                {% for radio in form.enfermedades_respiratorias %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Antibióticos último año</label>
+                                {% for radio in form.antibioticos_ultimo_anio %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sueño y Respiración -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-dark text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-moon-stars me-2"></i>Sueño y Respiración</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Tipo de respiración nocturna</label>
+                                {% for radio in form.respiracion_nocturna %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Movilidad al dormir</label>
+                                {% for radio in form.movilidad_dormir %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Bruxismo</label>
+                                {% for radio in form.bruxismo %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Recuperación al despertar</label>
+                                {% for radio in form.recuperacion_despertar %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evaluación de Funciones -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-check-circle me-2"></i>Evaluación de Funciones</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 text-center">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold d-block">Masticación</label>
+                                <div class="text-start d-inline-block">
+                                    {% for radio in form.eval_masticacion %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold d-block">Respiración</label>
+                                <div class="text-start d-inline-block">
+                                    {% for radio in form.eval_respiracion %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold d-block">Deglución</label>
+                                <div class="text-start d-inline-block">
+                                    {% for radio in form.eval_deglucion %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evaluación Neurovegetativa -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-info text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-brain me-2"></i>Evaluación Neurovegetativa</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-bold">Fonación</label>
+                                {% for radio in form.fonacion %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-bold">Actividad física</label>
+                                {% for radio in form.actividad_fisica %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-bold">Hábitos alimentarios</label>
+                                {% for radio in form.habitos_alimentarios %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-bold">Horas de pantallas</label>
+                                {% for radio in form.horas_pantallas %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado General -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-secondary text-white py-3">
+                        <h5 class="m-0"><i class="bi bi-person-check me-2"></i>Estado General</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ form.estado_satisfactorio }}
+                                    <label class="form-check-label fw-bold text-success" for="{{ form.estado_satisfactorio.id_for_label }}">Satisfactorio</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ form.estado_mejorable }}
+                                    <label class="form-check-label fw-bold text-warning" for="{{ form.estado_mejorable.id_for_label }}">Mejorable</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ form.estado_muy_mejorable }}
+                                    <label class="form-check-label fw-bold text-danger" for="{{ form.estado_muy_mejorable.id_for_label }}">Muy mejorable</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Antecedentes de interés</label>
+                                {{ form.antecedentes_interes }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Enfermedad actual</label>
+                                {{ form.enfermedad_actual }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Medicación actual</label>
+                                {{ form.medicacion_actual }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan de Tratamiento -->
+                <div class="card shadow-sm mb-4 border-0 rounded-3">
+                    <div class="card-header bg-gradient-success text-white py-3" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <h5 class="m-0"><i class="bi bi-clipboard-check me-2"></i>Plan de Tratamiento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    {{ form.plan_refuerzo_habitos }}
+                                    <label class="form-check-label" for="{{ form.plan_refuerzo_habitos.id_for_label }}">Solo refuerzo de hábitos saludables</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.plan_placa_confort }}
+                                    <label class="form-check-label" for="{{ form.plan_placa_confort.id_for_label }}">PlacaConfort y recomendaciones</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.plan_deglu_confort }}
+                                    <label class="form-check-label" for="{{ form.plan_deglu_confort.id_for_label }}">DegluConfort y recomendaciones</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.plan_nariz_confort }}
+                                    <label class="form-check-label" for="{{ form.plan_nariz_confort.id_for_label }}">NarizConfort y recomendaciones</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.plan_mascalin }}
+                                    <label class="form-check-label" for="{{ form.plan_mascalin.id_for_label }}">Mascalín (>5 años)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Mucosidad nasal</h6>
+                                <div class="form-check mb-2">
+                                    {{ form.plan_retirada_lacteos }}
+                                    <label class="form-check-label" for="{{ form.plan_retirada_lacteos.id_for_label }}">Retirada lácteos (1 mes)</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.plan_evitar_azucar }}
+                                    <label class="form-check-label" for="{{ form.plan_evitar_azucar.id_for_label }}">Evitar azúcar y harinas</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.plan_alimentos_duros }}
+                                    <label class="form-check-label" for="{{ form.plan_alimentos_duros.id_for_label }}">Alimentos duros/correosos</label>
+                                </div>
+                                <hr>
+                                <div class="form-check mb-2">
+                                    {{ form.plan_comer_sin_cubiertos }}
+                                    <label class="form-check-label" for="{{ form.plan_comer_sin_cubiertos.id_for_label }}">Comer sin cubiertos</label>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="form-label fw-bold">Comer por lado preferente</label>
+                                    <div class="d-flex gap-3">
+                                        {% for radio in form.plan_comer_lado_preferente %}
+                                        <div class="form-check">
+                                            {{ radio.tag }}
+                                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+                    <a href="{% url 'pacientes:detalle' paciente.id %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        <i class="bi bi-save me-2"></i>Guardar Evaluación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary { background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); }
+    .bg-gradient-success { background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); }
+    .bg-gradient-info { background: linear-gradient(135deg, #36b9cc 0%, #258391 100%); }
+    .bg-gradient-warning { background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%); }
+    .bg-gradient-danger { background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%); }
+    .bg-gradient-secondary { background: linear-gradient(135deg, #858796 0%, #60616f 100%); }
+    .bg-gradient-dark { background: linear-gradient(135deg, #5a5c69 0%, #373840 100%); }
+    
+    .card {
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    .form-check-input:checked {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,516 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cuentas por Cobrar{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .page-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 1rem 1rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 4px solid;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .stat-card.primary { border-left-color: #667eea; }
+    .stat-card.success { border-left-color: #11998e; }
+    .stat-card.danger { border-left-color: #eb3349; }
+    .stat-card.warning { border-left-color: #f093fb; }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .filter-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+
+    .btn-filter {
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-filter.active {
+        background: var(--primary-gradient) !important;
+        color: white !important;
+        border-color: transparent !important;
+    }
+
+    .debt-table {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+
+    .debt-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .debt-table thead th {
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+
+    .debt-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .debt-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .debt-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .avatar-circle {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .debt-amount {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #eb3349;
+    }
+
+    .debt-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .debt-badge.high { background: #ffe5e5; color: #eb3349; }
+    .debt-badge.medium { background: #fff3cd; color: #f5576c; }
+    .debt-badge.low { background: #d4edda; color: #11998e; }
+
+    .progress-custom {
+        height: 8px;
+        border-radius: 50px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+
+    .progress-bar-custom {
+        height: 100%;
+        border-radius: 50px;
+        transition: width 0.6s ease;
+    }
+
+    .progress-bar-custom.high { background: linear-gradient(90deg, #eb3349 0%, #f45c43 100%); }
+    .progress-bar-custom.medium { background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%); }
+    .progress-bar-custom.low { background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%); }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+
+    .pagination {
+        margin-top: 2rem;
+    }
+
+    .page-link {
+        border-radius: 0.5rem;
+        margin: 0 0.25rem;
+        border: none;
+        color: #667eea;
+        font-weight: 500;
+    }
+
+    .page-link:hover {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .page-item.active .page-link {
+        background: var(--primary-gradient);
+        border-color: transparent;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-1"><i class="bi bi-wallet2"></i> Cuentas por Cobrar</h1>
+                <p class="mb-0 opacity-75">Gestión y seguimiento de deudas pendientes</p>
+            </div>
+            <a href="{% url 'pacientes:reportes' %}" class="btn btn-light rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i>Volver a Reportes
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- Estadísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card primary">
+                <div class="stat-label">Total Pacientes</div>
+                <div class="stat-value">{{ total_pacientes }}</div>
+                <small><i class="bi bi-people"></i> Con deuda pendiente</small>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card danger">
+                <div class="stat-label">Deuda Total</div>
+                <div class="stat-value">S/ {{ total_deudas|floatformat:2 }}</div>
+                <small><i class="bi bi-exclamation-triangle"></i> Por cobrar</small>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card warning">
+                <div class="stat-label">Deuda Promedio</div>
+                <div class="stat-value">S/ {{ deuda_promedio|floatformat:2 }}</div>
+                <small><i class="bi bi-graph-up"></i> Por paciente</small>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card success">
+                <div class="stat-label">Rango de Deudas</div>
+                <div class="stat-value" style="font-size: 1.25rem;">
+                    S/ {{ deuda_minima|floatformat:0 }} - S/ {{ deuda_maxima|floatformat:0 }}
+                </div>
+                <small><i class="bi bi-bar-chart"></i> Mín - Máx</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Fecha Desde</label>
+                <input type="date" name="fecha_desde" class="form-control" value="{{ fecha_desde }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Fecha Hasta</label>
+                <input type="date" name="fecha_hasta" class="form-control" value="{{ fecha_hasta }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Filtros Rápidos</label>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="submit" name="filtro_rapido" value="1mes" 
+                            class="btn btn-outline-primary btn-filter {% if filtro_rapido == '1mes' %}active{% endif %}">
+                        Último Mes
+                    </button>
+                    <button type="submit" name="filtro_rapido" value="3meses" 
+                            class="btn btn-outline-primary btn-filter {% if filtro_rapido == '3meses' %}active{% endif %}">
+                        3 Meses
+                    </button>
+                    <button type="submit" name="filtro_rapido" value="6meses" 
+                            class="btn btn-outline-primary btn-filter {% if filtro_rapido == '6meses' %}active{% endif %}">
+                        6 Meses
+                    </button>
+                    <button type="submit" name="filtro_rapido" value="anio" 
+                            class="btn btn-outline-primary btn-filter {% if filtro_rapido == 'anio' %}active{% endif %}">
+                        Este Año
+                    </button>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-search me-2"></i>Aplicar Filtros
+                    </button>
+                    <a href="{% url 'pacientes:deudas' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="bi bi-x-lg me-2"></i>Limpiar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de Deudas -->
+    {% if pacientes_con_deuda %}
+    <div class="debt-table">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Deuda</th>
+                    <th>Tratamientos</th>
+                    <th>Último Pago</th>
+                    <th>% Deuda</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in pacientes_con_deuda %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar-circle">
+                                {{ item.paciente.nombre_completo|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ item.paciente.nombre_completo }}</div>
+                                <small class="text-muted">DNI: {{ item.paciente.dni }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="debt-amount">S/ {{ item.deuda_total|floatformat:2 }}</div>
+                        <small class="text-muted">de S/ {{ item.costo_total|floatformat:2 }}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary rounded-pill">
+                            {{ item.num_tratamientos }} tratamiento{{ item.num_tratamientos|pluralize }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if item.ultimo_pago %}
+                            <div>{{ item.ultimo_pago|date:"d/m/Y" }}</div>
+                            <small class="text-muted">{{ item.ultimo_pago|timesince }} atrás</small>
+                        {% else %}
+                            <span class="text-muted">Sin pagos</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="mb-1">
+                            {% if item.porcentaje_deuda >= 70 %}
+                                <span class="debt-badge high">{{ item.porcentaje_deuda }}%</span>
+                            {% elif item.porcentaje_deuda >= 40 %}
+                                <span class="debt-badge medium">{{ item.porcentaje_deuda }}%</span>
+                            {% else %}
+                                <span class="debt-badge low">{{ item.porcentaje_deuda }}%</span>
+                            {% endif %}
+                        </div>
+                        <div class="progress-custom">
+                            <div class="progress-bar-custom {% if item.porcentaje_deuda >= 70 %}high{% elif item.porcentaje_deuda >= 40 %}medium{% else %}low{% endif %}" 
+                                 style="width: {{ item.porcentaje_deuda }}%"></div>
+                        </div>
+                    </td>
+                    <td class="text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            {% if item.paciente.telefono %}
+                            <button type="button" 
+                                    class="action-btn btn-success" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#whatsappModal"
+                                    data-paciente-nombre="{{ item.paciente.nombre_completo }}"
+                                    data-paciente-telefono="{{ item.paciente.telefono }}"
+                                    data-deuda-monto="{{ item.deuda_total|floatformat:2 }}"
+                                    title="Enviar recordatorio">
+                                <i class="bi bi-whatsapp"></i>
+                            </button>
+                            {% endif %}
+                            <a href="{% url 'pacientes:detalle' item.paciente.pk %}" 
+                            class="action-btn btn-primary" 
+                            title="Ver Detalle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if page_obj.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if filtro_rapido %}&filtro_rapido={{ filtro_rapido }}{% endif %}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if filtro_rapido %}&filtro_rapido={{ filtro_rapido }}{% endif %}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-check-circle"></i>
+        <h4 class="text-muted">No hay deudas pendientes</h4>
+        <p class="text-muted">
+            {% if fecha_desde or fecha_hasta %}
+                No se encontraron pacientes con deuda en el rango de fechas seleccionado.
+            {% else %}
+                ¡Excelente! No hay pacientes con deudas pendientes.
+            {% endif %}
+        </p>
+        <a href="{% url 'pacientes:deudas' %}" class="btn btn-outline-primary rounded-pill">
+            Ver Todas las Deudas
+        </a>
+    </div>
+    {% endif %}
+</div>
+<!-- Modal WhatsApp -->
+<div class="modal fade" id="whatsappModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-whatsapp"></i> Recordatorio de Pago</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Mensaje</label>
+                    <textarea class="form-control" id="whatsappMessage" rows="6"></textarea>
+                    <small id="charCount" class="text-muted">0 caracteres</small>
+                </div>
+                <div class="alert alert-info mb-0">
+                    <small>
+                        <strong>Paciente:</strong> <span id="modalNombre"></span><br>
+                        <strong>Teléfono:</strong> <span id="modalTelefono"></span><br>
+                        <strong>Deuda:</strong> S/ <span id="modalMonto"></span>
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="sendWhatsAppBtn">
+                    <i class="bi bi-whatsapp"></i> Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+// WhatsApp Modal
+const modal = document.getElementById('whatsappModal');
+modal?.addEventListener('show.bs.modal', function (e) {
+    const btn = e.relatedTarget;
+    const nombre = btn.getAttribute('data-paciente-nombre');
+    const telefono = btn.getAttribute('data-paciente-telefono');
+    const monto = btn.getAttribute('data-deuda-monto');
+    
+    document.getElementById('modalNombre').textContent = nombre;
+    document.getElementById('modalTelefono').textContent = telefono;
+    document.getElementById('modalMonto').textContent = monto;
+    
+    const mensaje = `Hola ${nombre}, te recordamos que tienes un saldo pendiente de S/ ${monto}. Puedes realizar el pago en nuestro consultorio. Gracias 💳`;
+    document.getElementById('whatsappMessage').value = mensaje;
+    updateCharCount();
+});
+document.getElementById('sendWhatsAppBtn')?.addEventListener('click', function() {
+    const telefono = document.getElementById('modalTelefono').textContent;
+    const mensaje = document.getElementById('whatsappMessage').value;
+    const cleaned = telefono.replace(/[\s\-\(\)]/g, '');
+    const url = `https://wa.me/51${cleaned}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+    bootstrap.Modal.getInstance(modal).hide();
+});
+function updateCharCount() {
+    const msg = document.getElementById('whatsappMessage');
+    const count = document.getElementById('charCount');
+    count.textContent = `${msg.value.length} caracteres`;
+}
+document.getElementById('whatsappMessage')?.addEventListener('input', updateCharCount);
+</script>
+
+
+
+
+
+{% endblock %}

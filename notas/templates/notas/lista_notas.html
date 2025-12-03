@@ -1,0 +1,432 @@
+<!-- notas/templates/notas/lista_notas.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lista de Notas{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #4e73df;
+        --secondary-color: #858796;
+        --success-color: #1cc88a;
+        --info-color: #36b9cc;
+        --warning-color: #f6c23e;
+        --danger-color: #e74a3b;
+        --light-bg: #f8f9fc;
+        --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+
+    /* Card Styling */
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background: #fff;
+    }
+
+    .filter-card {
+        margin-bottom: 2rem;
+    }
+
+    .table-card {
+        overflow: hidden;
+    }
+
+    /* Search & Inputs */
+    .search-box {
+        border-radius: 2rem;
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #e3e6f0;
+        background-color: #f8f9fc;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .search-box:focus {
+        background-color: #fff;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        outline: none;
+    }
+
+    .form-control-pill {
+        border-radius: 2rem;
+        border: 1px solid #e3e6f0;
+        padding: 0.5rem 1rem;
+        background-color: #f8f9fc;
+    }
+    
+    .form-control-pill:focus {
+        background-color: #fff;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    /* Table Styling */
+    .table-custom {
+        margin-bottom: 0;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-custom thead th {
+        background-color: #f8f9fc;
+        color: var(--secondary-color);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #e3e6f0;
+        padding: 1rem 1.5rem;
+    }
+
+    .table-custom tbody td {
+        padding: 1.25rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e3e6f0;
+        color: #5a5c69;
+    }
+
+    .table-custom tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table-custom tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background-color: #fdfdfe;
+    }
+
+    /* Note Content */
+    .note-title {
+        font-weight: 700;
+        color: #4e73df;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .note-content-preview {
+        color: #858796;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--secondary-color);
+        background-color: transparent;
+        border: 1px solid transparent;
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        background-color: #f1f3f9;
+        color: var(--primary-color);
+    }
+
+    .action-btn.btn-view:hover { color: var(--primary-color); background-color: rgba(78, 115, 223, 0.1); }
+    .action-btn.btn-edit:hover { color: var(--warning-color); background-color: rgba(246, 194, 62, 0.1); }
+    .action-btn.btn-delete:hover { color: var(--danger-color); background-color: rgba(231, 74, 59, 0.1); }
+
+    /* Badges & Icons */
+    .badge-pill {
+        border-radius: 50rem;
+        padding: 0.35em 0.8em;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #d1d3e2;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Pagination */
+    .page-link {
+        border: none;
+        color: var(--secondary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 0.25rem;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .page-link:hover {
+        background-color: #eaecf4;
+        color: var(--primary-color);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary-color);
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+    }
+    
+    .page-item {
+        list-style: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1 text-gray-800">
+                <i class="bi bi-journal-text text-primary me-2"></i>Lista de Notas
+            </h2>
+            <p class="text-muted mb-0">Gestión de notas y recordatorios clínicos</p>
+        </div>
+        {% if paciente %}
+            <a href="{% url 'notas:crear_para_paciente' paciente.pk %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Nueva Nota
+            </a>
+        {% else %}
+            <a href="{% url 'notas:crear' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Nueva Nota
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Información del paciente (si aplica) -->
+    {% if paciente %}
+    <div class="alert alert-info mb-4 shadow-sm border-0 rounded-3 d-flex align-items-center">
+        <div class="me-3">
+            <i class="bi bi-person-circle fs-4"></i>
+        </div>
+        <div>
+            <strong>Notas para:</strong> {{ paciente.nombre_completo }} 
+            <div class="small opacity-75">DNI: {{ paciente.dni }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Search & Filter -->
+    <div class="card filter-card">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3 align-items-center">
+                <!-- Búsqueda -->
+                <div class="col-md-4">
+                    <div class="position-relative">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        <input type="text" name="q" class="search-box ps-5"
+                            placeholder="Buscar en título o contenido..." value="{{ request.GET.q|default:'' }}">
+                    </div>
+                </div>
+
+                {% if not paciente %}
+                <!-- Filtro de paciente -->
+                <div class="col-md-3">
+                    <input type="text" name="paciente" class="form-control form-control-pill"
+                        placeholder="Filtrar por paciente..." value="{{ request.GET.paciente|default:'' }}">
+                </div>
+                {% endif %}
+
+                <!-- Fecha inicio -->
+                <div class="col-md-2">
+                    <input type="date" name="fecha_inicio" class="form-control form-control-pill"
+                        value="{{ request.GET.fecha_inicio }}" placeholder="Desde">
+                </div>
+
+                <!-- Fecha fin -->
+                <div class="col-md-2">
+                    <input type="date" name="fecha_fin" class="form-control form-control-pill"
+                        value="{{ request.GET.fecha_fin }}" placeholder="Hasta">
+                </div>
+
+                <!-- Botones -->
+                <div class="col-md-1 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark rounded-circle shadow-sm" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;" title="Filtrar">
+                        <i class="bi bi-funnel"></i>
+                    </button>
+                    {% if request.GET.q or request.GET.paciente or request.GET.fecha_inicio or request.GET.fecha_fin %}
+                    <a href="{% if paciente %}{% url 'notas:lista_por_paciente' paciente.pk %}{% else %}{% url 'notas:lista' %}{% endif %}"
+                        class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;" title="Limpiar">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Notas -->
+    <div class="card table-card">
+        {% if notas %}
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Título</th>
+                        <th>Contenido</th>
+                        {% if not paciente %}<th>Paciente</th>{% endif %}
+                        <th>Fecha</th>
+                        <th class="text-center" style="width: 80px;"><i class="bi bi-image"></i></th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for nota in notas %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="note-title">
+                                <i class="bi bi-sticky text-warning"></i>
+                                <span>{{ nota.titulo }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="note-content-preview">{{ nota.contenido|truncatewords:10 }}</span>
+                        </td>
+                        {% if not paciente %}
+                        <td>
+                            {% if nota.paciente %}
+                                <a href="{% url 'pacientes:detalle' nota.paciente.pk %}"
+                                    class="text-decoration-none fw-bold text-gray-800">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px;">
+                                            {{ nota.paciente.nombre_completo|slice:":1" }}
+                                        </div>
+                                        {{ nota.paciente.nombre_completo }}
+                                    </div>
+                                </a>
+                            {% else %}
+                                <span class="badge bg-secondary badge-pill">General</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-gray-800">{{ nota.creado_en|date:"d M, Y" }}</span>
+                                <small class="text-muted">{{ nota.creado_en|date:"H:i" }}</small>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            {% if nota.num_imagenes > 0 %}
+                                <span class="badge bg-success-subtle text-success badge-pill" 
+                                      data-bs-toggle="tooltip" 
+                                      title="{{ nota.num_imagenes }} imagen{{ nota.num_imagenes|pluralize:'es' }}">
+                                    <i class="bi bi-image-fill me-1"></i>{{ nota.num_imagenes }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small opacity-50">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-1">
+                                <a href="{% url 'notas:detalle' nota.pk %}"
+                                    class="action-btn btn-view"
+                                    data-bs-toggle="tooltip" title="Ver Detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'notas:editar' nota.pk %}"
+                                    class="action-btn btn-edit"
+                                    data-bs-toggle="tooltip" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'notas:eliminar' nota.pk %}"
+                                    class="action-btn btn-delete"
+                                    onclick="return confirm('¿Eliminar esta nota?')"
+                                    data-bs-toggle="tooltip" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <div class="card-footer bg-white border-0 py-4">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if not paciente and request.GET.paciente %}&paciente={{ request.GET.paciente }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {{ page_obj.number }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if not paciente and request.GET.paciente %}&paciente={{ request.GET.paciente }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-journal-x"></i>
+            </div>
+            <h4 class="text-gray-800 fw-bold mb-2">No se encontraron notas</h4>
+            <p class="text-muted mb-4">
+                {% if paciente %}
+                    No hay notas registradas para <strong>{{ paciente.nombre_completo }}</strong>.
+                {% else %}
+                    No hay notas registradas en el sistema con los filtros actuales.
+                {% endif %}
+            </p>
+            {% if paciente %}
+                <a href="{% url 'notas:crear_para_paciente' paciente.pk %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-plus-lg me-2"></i>Crear Primera Nota
+                </a>
+            {% else %}
+                <a href="{% url 'notas:crear' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-plus-lg me-2"></i>Crear Primera Nota
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

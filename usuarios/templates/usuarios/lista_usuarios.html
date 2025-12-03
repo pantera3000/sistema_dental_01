@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-people-fill me-2"></i>Gestión de Usuarios</h2>
+        <a href="{% url 'usuarios:crear' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-2"></i>Nuevo Usuario
+        </a>
+    </div>
+
+    <div class="row">
+        {% for usuario in usuarios %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; font-size: 24px;">
+                            {{ usuario.first_name|slice:":1"|upper }}{{ usuario.last_name|slice:":1"|upper }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-0">{{ usuario.get_full_name|default:usuario.username }}</h5>
+                            <small class="text-muted">@{{ usuario.username }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-{{ usuario.perfil.get_rol_badge_class }}">
+                            <i class="{{ usuario.perfil.get_rol_icon }} me-1"></i>
+                            {{ usuario.perfil.get_rol }}
+                        </span>
+                        {% if not usuario.is_active %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="bi bi-envelope me-1"></i>{{ usuario.email|default:"Sin email" }}
+                        </small>
+                    </div>
+                    {% if usuario.perfil.telefono %}
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="bi bi-telephone me-1"></i>{{ usuario.perfil.telefono }}
+                        </small>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'usuarios:editar' usuario.id %}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                        <a href="{% url 'usuarios:toggle' usuario.id %}" class="btn btn-sm btn-outline-{{ usuario.is_active|yesno:'danger,success' }}">
+                            <i class="bi bi-{{ usuario.is_active|yesno:'x-circle,check-circle' }}"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>No hay usuarios registrados.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
