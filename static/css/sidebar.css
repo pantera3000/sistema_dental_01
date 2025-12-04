@@ -313,18 +313,18 @@
     transition: opacity var(--transition-speed);
 }
 
-.sidebar-overlay.active {
+.sidebar-overlay.show {
     display: block;
     opacity: 1;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .sidebar {
         transform: translateX(-100%);
     }
     
-    .sidebar.active {
+    .sidebar.show {
         transform: translateX(0);
     }
     

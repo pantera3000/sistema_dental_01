@@ -9,7 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Seguridad: ¡No subas este archivo a GitHub con DEBUG=True en producción!
 SECRET_KEY = 'django-insecure-tu-clave-secreta-aqui'  # Cambia esto en producción
 DEBUG = True
-ALLOWED_HOSTS = ['dramarquez.pythonanywhere.com', 'localhost']
+ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['dramarquez.pythonanywhere.com', 'localhost']
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
