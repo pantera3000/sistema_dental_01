@@ -318,7 +318,7 @@
     opacity: 1;
 }
 
-/* Responsive */
+/* Responsive - Mobile (Fixed for .show class) */
 @media (max-width: 1024px) {
     .sidebar {
         transform: translateX(-100%);
