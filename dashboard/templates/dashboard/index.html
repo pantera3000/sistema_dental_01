@@ -213,16 +213,31 @@
                 </div>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        fetch("{% url 'dashboard:api_citas_widget' %}")
-                            .then(response => response.text())
-                            .then(html => {
-                                document.getElementById('citas-widget-content').innerHTML = html;
-                            })
-                            .catch(error => {
-                                console.error('Error loading widget:', error);
-                                document.getElementById('citas-widget-content').innerHTML = 
-                                    '<p class="text-muted text-center py-3 text-danger"><i class="bi bi-exclamation-circle"></i> Error de conexión</p>';
-                            });
+                        const widgetContent = document.getElementById('citas-widget-content');
+                        const url = "{% url 'dashboard:api_citas_widget' %}";
+                        
+                        // Retraso intencional para priorizar carga de la página (1.5 segundos)
+                        setTimeout(() => {
+                            console.log('Iniciando carga diferida de widget de citas...');
+                            fetch(url)
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Network response was not ok: ' + response.statusText);
+                                    }
+                                    return response.text();
+                                })
+                                .then(html => {
+                                    widgetContent.innerHTML = html;
+                                })
+                                .catch(error => {
+                                    console.error('Error loading widget:', error);
+                                    widgetContent.innerHTML = `
+                                        <div class="text-center py-3 text-danger">
+                                            <i class="bi bi-exclamation-triangle"></i> Error: ${error.message}
+                                        </div>
+                                    `;
+                                });
+                        }, 1500); // 1500ms = 1.5 segundos
                     });
                 </script>
             </div>
