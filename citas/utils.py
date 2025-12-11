@@ -10,7 +10,7 @@ def get_calendar_events():
     Returns a list of event objects with timezone-aware 'local_begin' attribute.
     """
     # URL del ICS (Calendario privado o público)
-    ics_url = "https://calendar.google.com/calendar/ical/juancarloscn%40gmail.com/private-7c3dfb4a8b649579159a76228916d6cf/basic.ics"
+    ics_url = "https://calendar.google.com/calendar/ical/juancarloscn%40gmail.com/private-7c3dfb4a8b649579159a76228916d6cf/basic.ics "
     
     events = []
     try:
