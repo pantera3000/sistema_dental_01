@@ -11,16 +11,32 @@ def calendario_view(request):
     calendar_embed_url = "https://calendar.google.com/calendar/embed?src=es.pe%23holiday%40group.v.calendar.google.com&ctz=America%2FLima"
     return render(request, 'citas/calendario.html', {'calendar_embed_url': calendar_embed_url})
 
+
 def lista_eventos_view(request):
+    """
+    Vista principal que carga el esqueleto de la página.
+    Los eventos se cargan vía AJAX.
+    """
+    filter_type = request.GET.get('filter', 'week')
+    context = {
+        'current_filter': filter_type,
+    }
+    return render(request, 'citas/lista_eventos.html', context)
+
+def api_eventos_view(request):
+    """
+    Vista API que devuelve el HTML parcial de los eventos.
+    Se llama vía AJAX.
+    """
     from .utils import get_calendar_events
     
     today_events = []
     filtered_events = []
     error_message = None
-    filter_type = request.GET.get('filter', 'week') # Default filter: week (optimized for performance)
+    filter_type = request.GET.get('filter', 'week')
 
     try:
-        # Obtener eventos usando la utilidad compartida
+        # Obtener eventos
         all_events = get_calendar_events()
         
         # Configurar zona horaria y fechas
@@ -82,6 +98,6 @@ def lista_eventos_view(request):
         'filtered_events': filtered_events,
         'current_filter': filter_type,
         'error_message': error_message,
-        'now': now # Para mostrar la fecha actual si se desea
+        'now': now
     }
-    return render(request, 'citas/lista_eventos.html', context)
+    return render(request, 'citas/partials/eventos_list.html', context)
