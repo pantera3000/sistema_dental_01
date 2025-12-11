@@ -203,23 +203,28 @@
         <div class="col-lg-4">
             <div class="list-card">
                 <h5><i class="bi bi-calendar-event"></i> Próximas Citas</h5>
-                {% if proximas_citas %}
-                    {% for cita in proximas_citas %}
-                    <div class="list-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>{{ cita.name }}</strong>
-                                {% if cita.description %}
-                                <div class="small text-muted">{{ cita.description|truncatewords:5 }}</div>
-                                {% endif %}
-                            </div>
-                            <span class="badge bg-primary">{{ cita.local_begin|date:"d/m H:i" }}</span>
+                <div id="citas-widget-content">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary spinner-border-sm" role="status">
+                            <span class="visually-hidden">Cargando...</span>
                         </div>
+                        <p class="text-muted small mt-2 mb-0">Sincronizando...</p>
                     </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-muted text-center py-3">No hay citas próximas</p>
-                {% endif %}
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        fetch("{% url 'dashboard:api_citas_widget' %}")
+                            .then(response => response.text())
+                            .then(html => {
+                                document.getElementById('citas-widget-content').innerHTML = html;
+                            })
+                            .catch(error => {
+                                console.error('Error loading widget:', error);
+                                document.getElementById('citas-widget-content').innerHTML = 
+                                    '<p class="text-muted text-center py-3 text-danger"><i class="bi bi-exclamation-circle"></i> Error de conexión</p>';
+                            });
+                    });
+                </script>
             </div>
         </div>
 

@@ -1,0 +1,17 @@
+{% if proximas_citas %}
+    {% for cita in proximas_citas %}
+    <div class="list-item">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ cita.name }}</strong>
+                {% if cita.description %}
+                <div class="small text-muted">{{ cita.description|truncatewords:5 }}</div>
+                {% endif %}
+            </div>
+            <span class="badge bg-primary">{{ cita.local_begin|date:"d/m H:i" }}</span>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p class="text-muted text-center py-3">No hay citas próximas</p>
+{% endif %}

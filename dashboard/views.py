@@ -53,34 +53,10 @@ def dashboard_view(request):
         for t in tratamientos_con_deuda
     ])
     
-    # 5. Citas de esta semana (desde Google Calendar)
-    from citas.utils import get_calendar_events
-    import pytz
-    
-    # Obtener todos los eventos
-    all_events = get_calendar_events()
-    
-    # Configurar fechas para filtro de semana
-    limatz = pytz.timezone('America/Lima')
-    now_lima = now.astimezone(limatz)
-    start_week = now_lima - timedelta(days=now_lima.weekday())
-    start_week = start_week.replace(hour=0, minute=0, second=0, microsecond=0)
-    end_week = start_week + timedelta(days=7)
-    
+    # 5. Citas de esta semana (Carga asíncrona via AJAX)
+    # Se obtienen en una vista separada para mejorar LCP
     citas_semana = 0
     proximas_citas = []
-    
-    for event in all_events:
-        # Contar citas de esta semana
-        if start_week <= event.local_begin < end_week:
-            citas_semana += 1
-            
-        # Recopilar próximas citas (futuras)
-        if event.local_begin >= now_lima:
-            proximas_citas.append(event)
-            
-    # Limitar próximas citas a 5
-    proximas_citas = proximas_citas[:5]
 
     # 6. Tasa de Cobro (%)
     total_facturado = Tratamiento.objects.aggregate(
@@ -310,4 +286,35 @@ def estadisticas_view(request):
         'porcentaje_cancelado': porcentaje_cancelado,
     }
     
-    return render(request, 'dashboard/estadisticas.html', context)
+
+def dashboard_citas_api(request):
+    """
+    API para cargar el widget de citas del dashboard asíncronamente
+    """
+    from citas.utils import get_calendar_events
+    import pytz
+    
+    # Renderizar solo el partial
+    try:
+        all_events = get_calendar_events()
+        
+        # Configurar fechas
+        now = timezone.now()
+        limatz = pytz.timezone('America/Lima')
+        now_lima = now.astimezone(limatz)
+        
+        proximas_citas = []
+        for event in all_events:
+            # Recopilar próximas citas (futuras)
+            if event.local_begin >= now_lima:
+                proximas_citas.append(event)
+        
+        # Limitar a 5
+        proximas_citas = proximas_citas[:5]
+        
+    except Exception:
+        proximas_citas = []
+        
+    return render(request, 'dashboard/partials/citas_widget.html', {
+        'proximas_citas': proximas_citas
+    })
