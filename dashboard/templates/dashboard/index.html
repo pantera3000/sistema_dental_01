@@ -274,6 +274,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const DELAY_MS = 5000; 
 
     setTimeout(() => {
+        // ACTUALIZACIÓN VISUAL PARA DEBUG
+        widgetContent.innerHTML = '<div class="text-center py-3 text-warning fw-bold">⏳ INICIANDO TIMEOUT (5s)...</div>';
         console.log(`Executing fetch after ${DELAY_MS}ms delay...`);
         
         fetch(url)
